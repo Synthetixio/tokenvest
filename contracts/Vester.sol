@@ -16,18 +16,23 @@ contract Vester is Ownable {
         uint128 totalAmount;
         uint128 amountRedeemed;
     }
-    mapping (address => Grant) grants;
+    mapping (address => Grant) public grants;
+    address tokenAddress;
+
+    constructor(address _tokenAddress) {
+        tokenAddress = _tokenAddress;
+    }
 
     /// @notice Redeem all available vested SNX for the calling address
     function redeem() external {
         uint128 amount = availableForRedemption(msg.sender);
         require(amount > 0, "You don't have any SNX currently available for redemption.");
 
-        IERC20 snxContract = IERC20(0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F);
-        require(snxContract.balanceOf(address(this)) >= amount, "More SNX must be transferred to this contract before you can redeem.");
+        IERC20 tokenContract = IERC20(tokenAddress);
+        require(tokenContract.balanceOf(address(this)) >= amount, "More SNX must be transferred to this contract before you can redeem.");
 
         grants[msg.sender].amountRedeemed += amount;
-        snxContract.transfer(msg.sender, amount);
+        tokenContract.transfer(msg.sender, amount);
 
         emit Redemption(msg.sender, amount);
     }
@@ -81,13 +86,13 @@ contract Vester is Ownable {
     /// @dev This is a convenience function that wraps updateGrant
     /// @param granteeAddress The address of the grant recipient
     /// @param totalSNX The size of the grant, denominated in SNX
-    function createGrant(address granteeAddress, uint32 totalSNX) external onlyOwner {
+    function createGrant(address granteeAddress, uint128 totalSNX) external onlyOwner {
         updateGrant(
             granteeAddress,
             uint64(block.timestamp),
             uint64(block.timestamp) + 7889400 * 2,
-            totalSNX * 1 ether / 4 * 3,
-            totalSNX * 1 ether,
+            totalSNX * 1e18 / 4 / 3,
+            totalSNX * 1e18,
             0
         );
     }
