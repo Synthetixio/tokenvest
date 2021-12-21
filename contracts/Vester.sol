@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 
-/// @title SNX Vesting Contract
+/// @title Vesting Contract
 /// @author Noah Litvin (@noahlitvin)
-/// @notice This contract allows the recipient of a grant to redeem SNX tokens each quarter, up to a total amount with an optional cliff.
+/// @notice This contract allows the recipient of a grant to redeem tokens each quarter, up to a total amount with an optional cliff.
 contract Vester is Ownable {
 
     struct Grant {
@@ -23,13 +23,13 @@ contract Vester is Ownable {
         tokenAddress = _tokenAddress;
     }
 
-    /// @notice Redeem all available vested SNX for the calling address
+    /// @notice Redeem all available vested tokens for the calling address
     function redeem() external {
         uint128 amount = availableForRedemption(msg.sender);
-        require(amount > 0, "You don't have any SNX currently available for redemption.");
+        require(amount > 0, "You don't have any tokens currently available for redemption.");
 
         IERC20 tokenContract = IERC20(tokenAddress);
-        require(tokenContract.balanceOf(address(this)) >= amount, "More SNX must be transferred to this contract before you can redeem.");
+        require(tokenContract.balanceOf(address(this)) >= amount, "More tokens must be transferred to this contract before you can redeem.");
 
         grants[msg.sender].amountRedeemed += amount;
         tokenContract.transfer(msg.sender, amount);
@@ -37,17 +37,17 @@ contract Vester is Ownable {
         emit Redemption(msg.sender, amount);
     }
 
-    /// @notice Calculate the amount of SNX currently available for redemption for a given grantee
-    /// @dev This subtracts the amount of previously redeemed SNX from the total amount that has vested
+    /// @notice Calculate the amount of tokens currently available for redemption for a given grantee
+    /// @dev This subtracts the amount of previously redeemed token from the total amount that has vested
     /// @param redeemerAddress The address of the grantee
-    /// @return The amount available for redemption, denominated in SNX * 10^18
+    /// @return The amount available for redemption, denominated in tokens * 10^18
     function availableForRedemption(address redeemerAddress) public view returns (uint128) {
         return amountVested(redeemerAddress) - grants[redeemerAddress].amountRedeemed;
     }
 
     /// @notice Calculate the amount that has vested for a given address
     /// @param redeemerAddress The address of the grantee
-    /// @return The amount of vested SNX, denominated in SNX * 10^18
+    /// @return The amount of vested tokens, denominated in tokens * 10^18
     function amountVested(address redeemerAddress) public view returns (uint128) {
         // Nothing has vested until the cliff has past.
         if(block.timestamp < grants[redeemerAddress].cliffTimestamp){
@@ -68,10 +68,10 @@ contract Vester is Ownable {
     /// @notice Update the data pertaining to a grant
     /// @param granteeAddress The address of the grant recipient
     /// @param startTimestamp The timestamp defining the start of the vesting schedule
-    /// @param cliffTimestamp Before this timestamp, no SNX can be redeemed
-    /// @param quarterlyAmount The amount of SNX that will vest for the recipient each quarter, denominated in SNX * 10^18
-    /// @param totalAmount The total amount of SNX that will be granted to the recipient, denominated in SNX * 10^18
-    /// @param amountRedeemed The amount of SNX already redeemed by this recipient
+    /// @param cliffTimestamp Before this timestamp, no tokens can be redeemed
+    /// @param quarterlyAmount The amount of tokens that will vest for the recipient each quarter, denominated in tokens * 10^18
+    /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
+    /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     function updateGrant(address granteeAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 quarterlyAmount, uint128 totalAmount, uint128 amountRedeemed) public onlyOwner {
         grants[granteeAddress].startTimestamp = startTimestamp;
         grants[granteeAddress].cliffTimestamp = cliffTimestamp;
@@ -85,14 +85,14 @@ contract Vester is Ownable {
     /// @notice Create a grant that vests over three years with a six month cliff
     /// @dev This is a convenience function that wraps updateGrant
     /// @param granteeAddress The address of the grant recipient
-    /// @param totalSNX The size of the grant, denominated in SNX
-    function createGrant(address granteeAddress, uint128 totalSNX) external onlyOwner {
+    /// @param grantSize The size of the grant, denominated in tokens
+    function createGrant(address granteeAddress, uint128 grantSize) external onlyOwner {
         updateGrant(
             granteeAddress,
             uint64(block.timestamp),
             uint64(block.timestamp) + 7889400 * 2,
-            totalSNX * 1e18 / 4 / 3,
-            totalSNX * 1e18,
+            grantSize * 1e18 / 4 / 3,
+            grantSize * 1e18,
             0
         );
     }
