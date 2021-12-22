@@ -3,6 +3,7 @@
 ## Notes/Considerations
 * Does not support multiple grants to the same wallet address
 * Consider workflow for sending arbitrary tokens in exchange and allow owner to redeem
+* Withdraw SNX balance back to owner?
 * Deployer will be owner, is this what we want?
 * Add upgradeability proxy?
 * Add on-chain storage of all grantee addresses?
@@ -17,3 +18,10 @@ Admin UI
 - show all events
 - CRUD for grants
 WILL ADMIN BE A MULTISIG?
+
+## Dev Environment
+
+* Run `npx hardhat node`
+* Update testAddress in local-deploy script
+* In a seperate tab, `npx hardhat run --network localhost scripts/local-deploy.js`
+* Then start the front end, `cd frontend && npm run dev`
