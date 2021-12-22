@@ -6,4 +6,14 @@
 * Deployer will be owner, is this what we want?
 * Add upgradeability proxy?
 * Add on-chain storage of all grantee addresses?
-* Linear vesting instead of quarterly?
+* Think about change address: transferGrant(address fromAddress, address toAddress)
+    * Should this be in the UI for user and admin?
+
+Claimer UI
+- Show amount vested, info on your vesting schedule, etc.
+- Allow 'buy' the grant/options, start w/ sUSD
+
+Admin UI
+- show all events
+- CRUD for grants
+WILL ADMIN BE A MULTISIG?
