@@ -20,10 +20,10 @@ export default function WalletConnector() {
 
   return wallet.status === 'connected' ? (
     <>
-      <Button leftIcon={CircleIcon} mr={4} pointerEvents="none" background="blackAlpha.400"> {accountDisplay(wallet.account)}</Button>
-      <Button onClick={() => wallet.reset()}>Disconnect</Button>
+      <Button key={1} leftIcon={CircleIcon} mr={4} pointerEvents="none" background="blackAlpha.400"> {accountDisplay(wallet.account)}</Button>
+      <Button key={2} onClick={() => wallet.reset()}>Disconnect</Button>
     </>
   ) : (
-    <Button onClick={() => wallet.connect()}>Connect Wallet</Button>
+    <Button key={3} onClick={() => wallet.connect()}>Connect Wallet</Button>
   )
 }

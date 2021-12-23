@@ -14,7 +14,7 @@ function MyApp({ Component, pageProps }) {
           <meta name="description" content="coming soon" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Container as="main">
+        <Container as="main" maxW='container.md'>
           <Flex as="header" pt={9} pb={6}>
             <Heading size="lg" fontWeight="light">snxVest</Heading>
             <Box ml="auto">

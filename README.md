@@ -1,25 +1,21 @@
 # SNX Vestoooor
 
-## Notes/Considerations
-* Does not support multiple grants to the same wallet address
-* Consider workflow for sending arbitrary tokens in exchange and allow owner to redeem
-* Withdraw SNX balance back to owner?
-* Deployer will be owner, is this what we want?
-* Add upgradeability proxy?
-* Add on-chain storage of all grantee addresses?
-* Think about change address: transferGrant(address fromAddress, address toAddress)
-    * Should this be in the UI for user and admin?
-
-Claimer UI
-- Show amount vested, info on your vesting schedule, etc.
-- Allow 'buy' the grant/options, start w/ sUSD
-
-Admin UI
-- show all events
-- CRUD for grants
-WILL ADMIN BE A MULTISIG?
+## TODO
+* Add Recoil (Redeem should update RecentActivity)
+* Determine deployer and owner configurations
+  * Should the deployer be the owner?
+  * Will the deployer and/or owner be a multisig?
+  * Do we need an upgradeability proxy?
+* Additional Considerations:
+  * This currently only supports one grant per address. Is this okay?
+  * Should we add on-chain storage of all grantee addresses (for composability)?
+  * Should it be possible for the owner to withdraw back the SNX balance from the contract?
+  * Should we bother having the convenience methods in the smart contract?
+* New Feature: Allow transferOwnership of grant.
+* New Feature: Allow sending arbitrary tokens in exchange for withdrawal.
 
 ## Dev Environment
+*Instructions WIP*
 
 * Run `npx hardhat node`
 * Update testAddress in local-deploy script

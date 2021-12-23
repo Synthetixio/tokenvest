@@ -5,6 +5,8 @@ const config = {
     useSystemColorMode: false,
 }
 
-const theme = extendTheme({ config })
+let theme = extendTheme({ config })
+theme.components.Table.sizes.sm.th.px = 2
+theme.components.Table.sizes.sm.td.px = 2
 
 export default theme

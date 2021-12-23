@@ -1,8 +1,8 @@
 import { useWallet } from 'use-wallet'
 import { Text } from '@chakra-ui/react'
-import GrantStatus from '../components/GrantStatus'
-import RedeemSnx from '../components/RedeemSnx'
-import RecentActivity from '../components/RecentActivity'
+import GrantStatus from '../components/Home/GrantStatus'
+import RedeemSnx from '../components/Home/RedeemSnx'
+import RecentActivity from '../components/Home/RecentActivity'
 
 export default function Home() {
   const wallet = useWallet()

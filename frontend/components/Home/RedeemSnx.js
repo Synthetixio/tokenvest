@@ -3,8 +3,8 @@ import { useWallet } from 'use-wallet'
 import { Heading, Input, Button, FormControl, FormHelperText, Flex, Box, FormLabel, Text, Spinner, createStandaloneToast } from '@chakra-ui/react'
 import { DownloadIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
-import vesterAbi from '../../artifacts/contracts/Vester.sol/Vester.json'
-import theme from '../styles/theme'
+import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
+import theme from '../../styles/theme'
 
 export default function ReedemSnx() {
   const [loadingData, setLoadingData] = useState(true);
@@ -112,28 +112,35 @@ export default function ReedemSnx() {
       py={5}
       px={6}>
       <Heading size="lg" mb={1}><DownloadIcon transform="translateY(-2px)" boxSize={5} mr={1} /> Redeem SNX</Heading>
-      <Text mb={1}>You can redeem available SNX tokens. Available tokens do not expire.</Text>
+
       {loadingData ?
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :
         <>
-          <Flex mb={6}>
-            <Box>
-              <Text fontSize='3xl' fontWeight="medium">{vested.toLocaleString()}</Text>
-              <Text fontSize='sm' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8}>Vested</Text>
+          <Flex align="center" mb={6}>
+            <Box width="50%" pr={4} pt={2}>
+              <Text>You can redeem available SNX tokens. Available tokens do not expire.</Text>
             </Box>
-            <Box px={4}>
-              <Text fontSize='3xl' fontWeight="medium">-</Text>
-            </Box>
-            <Box>
-              <Text fontSize='3xl' fontWeight="medium">{redeemed.toLocaleString()}</Text>
-              <Text fontSize='sm' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8}>Redeemed</Text>
-            </Box>
-            <Box px={4}>
-              <Text fontSize='3xl' fontWeight="medium">=</Text>
-            </Box>
-            <Box>
-              <Text fontSize='3xl' fontWeight="medium">{available.toLocaleString()}</Text>
-              <Text fontSize='sm' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8}>Available</Text>
+            <Box width="50%" pr={4}>
+              <Flex>
+                <Box>
+                  <Text fontSize='2xl' fontWeight="medium">{vested.toLocaleString()}</Text>
+                  <Text fontSize='sm' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8}>Vested</Text>
+                </Box>
+                <Box px={4}>
+                  <Text fontSize='2xl' fontWeight="medium">-</Text>
+                </Box>
+                <Box>
+                  <Text fontSize='2xl' fontWeight="medium">{redeemed.toLocaleString()}</Text>
+                  <Text fontSize='sm' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8}>Redeemed</Text>
+                </Box>
+                <Box px={4}>
+                  <Text fontSize='2xl' fontWeight="medium">=</Text>
+                </Box>
+                <Box>
+                  <Text fontSize='2xl' fontWeight="medium">{available.toLocaleString()}</Text>
+                  <Text fontSize='sm' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8}>Available</Text>
+                </Box>
+              </Flex>
             </Box>
           </Flex>
 

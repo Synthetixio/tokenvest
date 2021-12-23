@@ -3,7 +3,7 @@ import { useWallet } from 'use-wallet'
 import { Heading, Progress, Flex, Box, Text, Spinner } from '@chakra-ui/react'
 import { InfoOutlineIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
-import vesterAbi from '../../artifacts/contracts/Vester.sol/Vester.json'
+import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 import { format, formatDistanceToNowStrict } from 'date-fns'
 
 export default function GrantStatus() {
@@ -53,12 +53,12 @@ export default function GrantStatus() {
       background="gray.900"
       py={5}
       px={6}>
-      <Heading size="lg"><InfoOutlineIcon transform="translateY(-2px)" boxSize={5} mr={1} /> Grant Status</Heading>
+      <Heading size="lg" mb={1}><InfoOutlineIcon transform="translateY(-2px)" boxSize={5} mr={1} /> Grant Status</Heading>
       {loadingData ?
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :
         <>
           <Flex align="center">
-            <Box width="60%" pr={4}>
+            <Box width="50%" pr={4}>
               {cliffTimestamp > Date.now() / 1000 ?
                 <>Your grant will vest {quarterlyAmount.toLocaleString()} SNX each quarter with a cliff on {format(new Date(cliffTimestamp * 1000), 'M/dd/yyyy')}.</>
                 :
@@ -68,7 +68,7 @@ export default function GrantStatus() {
                   <Text>Your grant vests quarterly. Your next {quarterlyAmount.toLocaleString()} SNX will vest in {nextVest}.</Text>
               }
             </Box>
-            <Box width="40%">
+            <Box width="50%">
               <Heading size="md" fontWeight="medium" mb={1}>{(vested / totalAmount * 100).toLocaleString()}% Vested</Heading>
               <Progress colorScheme='green' size='sm' borderRadius={8} value={vested / totalAmount * 100} />
               <Text opacity={0.8} fontSize="sm">{vested.toLocaleString()} SNX of {totalAmount.toLocaleString()} SNX</Text>
