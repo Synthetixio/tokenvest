@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useWallet } from 'use-wallet'
 import { Heading, Input, Button, FormControl, FormHelperText, Flex, Box, FormLabel, Text, Spinner, createStandaloneToast } from '@chakra-ui/react'
-import { DownloadIcon } from '@chakra-ui/icons'
+import { Icon } from '@chakra-ui/icons'
+import { BsCash } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 import theme from '../../styles/theme'
+import { parseErrorMessage } from '../../lib/helpers';
 
 export default function ReedemSnx() {
   const [loadingData, setLoadingData] = useState(true);
@@ -64,29 +66,10 @@ export default function ReedemSnx() {
     })
   }
 
-  const getErrorMessage = (error) => {
-    let message = 'An error has occurred.'
-    if (error?.message) {
-      message = error.message
-    } else if (error?.error?.message) {
-      // For Alchemy with ethers.providers.Web3Provider(window.ethereum) with alchemy
-      message = error.error.message.split(': ')[1]
-    } else if (error?.data?.message) {
-      // For ethers.providers.JsonRpcProvider()
-      message = error.data.message.match(/\'(.*)\'/).pop()
-    } else if (JSON.parse(error.body)?.error?.message) {
-      // For ethers.providers.Web3Provider(window.ethereum)
-      message = JSON.parse(error.body)
-        .error.message.match(/\'(.*)\'/)
-        .pop()
-    }
-    return message
-  }
-
   const errorToastEvent = (error) => {
     toast({
       title: 'Error',
-      description: getErrorMessage(error),
+      description: parseErrorMessage(error),
       status: 'error',
       position: 'top',
       isClosable: true,
@@ -111,7 +94,7 @@ export default function ReedemSnx() {
       background="gray.900"
       py={5}
       px={6}>
-      <Heading size="lg" mb={1}><DownloadIcon transform="translateY(-2px)" boxSize={5} mr={1} /> Redeem SNX</Heading>
+      <Heading size="lg" fontWeight="light"><Icon as={BsCash} boxSize={5} mr={2} />Redeem SNX</Heading>
 
       {loadingData ?
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :

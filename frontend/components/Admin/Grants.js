@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useWallet } from 'use-wallet'
 import { Heading, Box, Spinner, Table, Thead, Tbody, Tr, Th, Td, Link, Button, Flex } from '@chakra-ui/react'
-import { HamburgerIcon, EditIcon } from '@chakra-ui/icons'
+import { Icon, EditIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
 import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 import { format } from 'date-fns'
+import { BsAward } from 'react-icons/bs'
+import { accountDisplay } from '../../lib/helpers'
 
 export default function Grants() {
   const [loadingData, setLoadingData] = useState(true);
@@ -44,10 +46,6 @@ export default function Grants() {
     setLoadingData(false);
   }, [])
 
-  function accountDisplay(address) {
-    return address.substring(0, 6) + "..." + address.substring(address.length - 4)
-  }
-
   return (
     <Box
       mb={8}
@@ -56,7 +54,7 @@ export default function Grants() {
       py={5}
       px={6}>
       <Flex w="100%" align="center" mb={4}>
-        <Heading d="inline-block" size="lg"><HamburgerIcon transform="translateY(-2px)" boxSize={5} mr={1} /> Grants</Heading>
+        <Heading d="inline-block" size="lg" fontWeight="light"><Icon as={BsAward} boxSize={5} mr={2} />Grants</Heading>
         <Button ml="auto" colorScheme="green" size="sm">Create Grant</Button>
       </Flex>
       {loadingData ?

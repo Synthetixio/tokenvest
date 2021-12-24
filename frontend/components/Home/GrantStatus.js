@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useWallet } from 'use-wallet'
 import { Heading, Progress, Flex, Box, Text, Spinner } from '@chakra-ui/react'
-import { InfoOutlineIcon } from '@chakra-ui/icons'
+import { Icon } from '@chakra-ui/icons'
+import { BsClockHistory } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 import { format, formatDistanceToNowStrict } from 'date-fns'
@@ -53,7 +54,7 @@ export default function GrantStatus() {
       background="gray.900"
       py={5}
       px={6}>
-      <Heading size="lg" mb={1}><InfoOutlineIcon transform="translateY(-2px)" boxSize={5} mr={1} /> Grant Status</Heading>
+      <Heading size="lg" fontWeight="light"><Icon as={BsClockHistory} boxSize={5} mr={2} />Grant Status</Heading>
       {loadingData ?
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :
         <>

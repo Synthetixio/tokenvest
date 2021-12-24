@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useWallet } from 'use-wallet'
 import { Heading, Flex, Box, Text, Link, Spinner, Spacer } from '@chakra-ui/react'
-import { CalendarIcon, TimeIcon } from '@chakra-ui/icons'
+import { Icon, TimeIcon } from '@chakra-ui/icons'
+import { BsCalendarWeek } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 import { format, formatDistanceToNow } from 'date-fns'
@@ -58,7 +59,7 @@ export default function RecentActivity() {
       background="gray.900"
       py={5}
       px={6}>
-      <Heading size="lg"><CalendarIcon transform="translateY(-2px)" boxSize={5} mr={1} /> Recent Activity</Heading>
+      <Heading size="lg" fontWeight="light"><Icon as={BsCalendarWeek} boxSize={5} mr={2} />Recent Activity</Heading>
       {loadingData ?
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :
         <>
@@ -67,12 +68,13 @@ export default function RecentActivity() {
 
               <Flex w="100%" mb={3} alignItems="baseline">
 
-                <Heading d="inline" size="lg" fontWeight="light" mr={3}>
+                <Heading d="inline" size="md" fontWeight="medium" mr={3}>
                   {event.type == "Grant Update" && ind == events.length - 1 ? "Grant Issuance" : event.type}
                 </Heading>
 
                 <Link
                   d="inline"
+                  fontSize="sm"
                   transform="translateY(-1px)"
                   borderBottom="1px rgba(255,255,255,0.66) dotted"
                   borderRadius={1}

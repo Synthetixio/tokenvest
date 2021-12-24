@@ -1,13 +1,10 @@
 import { useWallet } from 'use-wallet'
 import { Button } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
+import { accountDisplay } from '../lib/helpers'
 
 export default function WalletConnector() {
   const wallet = useWallet()
-
-  function accountDisplay(address) {
-    return address.substring(0, 6) + "..." + address.substring(address.length - 4)
-  }
 
   const CircleIcon = (
     <Icon viewBox='0 0 200 200' color='green.500'>

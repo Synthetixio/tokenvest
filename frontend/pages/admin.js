@@ -1,6 +1,7 @@
 import { useWallet } from 'use-wallet'
 import { Text } from '@chakra-ui/react'
 import Grants from '../components/Admin/Grants'
+import TokenBalance from '../components/Admin/TokenBalance'
 import Events from '../components/Admin/Events'
 
 export default function Admin() {
@@ -12,6 +13,7 @@ export default function Admin() {
         {wallet.status === 'connected' ? (
           <>
             <Grants />
+            <TokenBalance />
             <Events />
           </>
         ) : (
