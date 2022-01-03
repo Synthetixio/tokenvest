@@ -82,16 +82,14 @@ contract Vester {
         return amount;
     }
 
-    /// @notice Withdraw all tokens in this contract to the caller
+    /// @notice Withdraw tokens owned by this contract to the caller
     /// @dev Only the owner of the contract may call this function.
     /// @param withdrawalTokenAddress The address of the ERC20 token to redeem
-    function withdraw(address withdrawalTokenAddress) public onlyOwner {
+    function withdraw(address withdrawalTokenAddress, uint withdrawalTokenAmount) public onlyOwner {
         IERC20 tokenContract = IERC20(withdrawalTokenAddress);
-        uint amount = tokenContract.balanceOf(address(this));
+        tokenContract.transfer(msg.sender, withdrawalTokenAmount);
 
-        tokenContract.transfer(msg.sender, amount);
-
-        emit Withdrawal(msg.sender, withdrawalTokenAddress, amount);
+        emit Withdrawal(msg.sender, withdrawalTokenAddress, withdrawalTokenAmount);
     }
 
     /// @notice Update the data pertaining to a grant
@@ -153,7 +151,7 @@ contract Vester {
         emit GrantTransferNomination(msg.sender, nominee);
     }
 
-    /// @notice Accept a grant transfer
+    /// @notice Accept a grant transfer, overwriting any existing grant associated with this address
     /// @param transferer The address currently assigned to the grant the caller is receiving
     function acceptGrantTransfer(address transferer) external {
         require(grants[transferer].transferNominee == msg.sender, "You have not been nominated to accept this grant.");
@@ -186,7 +184,7 @@ contract Vester {
     }
 
     modifier onlyOwner {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "Only the owner can call this function.");
         _;
     }
 
