@@ -6,7 +6,7 @@ import { ethers } from 'ethers'
 import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 import { format } from 'date-fns'
 import { BsAward } from 'react-icons/bs'
-import { accountDisplay } from '../../lib/helpers'
+import { accountDisplay } from '../../lib/utils/helpers'
 
 export default function Grants() {
   const [loadingData, setLoadingData] = useState(true);

@@ -6,7 +6,7 @@ import { BsCash } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 import theme from '../../styles/theme'
-import { parseErrorMessage } from '../../lib/helpers';
+import { parseErrorMessage } from '../../lib/utils/helpers'
 
 export default function ReedemSnx() {
   const [loadingData, setLoadingData] = useState(true);

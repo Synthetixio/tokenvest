@@ -1,3 +1,6 @@
+// Review the default theme foudnation style files for what to override
+// https://github.com/chakra-ui/chakra-ui/tree/main/packages/theme/src/foundations
+
 import { extendTheme } from '@chakra-ui/react'
 
 const config = {

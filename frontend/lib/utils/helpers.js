@@ -12,7 +12,7 @@ export const parseErrorMessage = (error) => {
     } else if (error?.data?.message) {
         // For ethers.providers.JsonRpcProvider()
         message = error.data.message.match(/\'(.*)\'/).pop()
-    } else if (JSON.parse(error.body)?.error?.message) {
+    } else if (JSON.parse(error.body)?.error?.message) { // TODO: this can error instead of returning false
         // For ethers.providers.Web3Provider(window.ethereum)
         message = JSON.parse(error.body)
             .error.message.match(/\'(.*)\'/)

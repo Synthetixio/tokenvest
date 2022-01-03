@@ -11,7 +11,7 @@ describe("Vester", function () {
     await tokenContract.deployed();
 
     const VesterContract = await ethers.getContractFactory('Vester');
-    const vester = await VesterContract.deploy(tokenContract.address);
+    const vester = await VesterContract.deploy(owner.address, tokenContract.address);
     await vester.deployed();
 
     await tokenContract.mint(vester.address, ethers.utils.parseEther("30000"))
@@ -62,6 +62,7 @@ describe("Vester", function () {
       grantInfo.quarterlyAmount,
       ethers.utils.parseEther("30000"),
       grantInfo.amountRedeemed,
+      grantInfo.vestInterval,
     );
 
     // Now the user redeems as expected...
