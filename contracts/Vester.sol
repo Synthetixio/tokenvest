@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 /// @title Vesting Contract
 /// @author Noah Litvin (@noahlitvin)
-/// @notice This contract allows the recipient of a grant to redeem tokens each quarter, up to a total amount with an optional cliff.
+/// @notice This contract allows the recipient of a grant to redeem tokens each vesting interval, up to a total amount with an optional cliff.
 contract Vester {
 
     struct Grant {

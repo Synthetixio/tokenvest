@@ -1,4 +1,5 @@
 const hre = require("hardhat");
+const fs = require('fs');
 
 async function main() {
   await hre.run('compile');
@@ -24,8 +25,14 @@ async function main() {
     7889400 // vest interval
   );
 
-  console.log("Sample Token deployed to:", sampleToken.address);
   console.log("Vester deployed to:", vester.address);
+  console.log("Sample Token deployed to:", sampleToken.address);
+
+  const data = `NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS=${vester.address}\nNEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS=${sampleToken.address}`
+  //const data = "Test"
+  fs.writeFileSync("frontend/.env.local", data);
+
+  console.log("frontend/.env.local updated")
 }
 
 main()

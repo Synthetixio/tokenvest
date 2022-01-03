@@ -32,7 +32,7 @@ export const grantState = selectorFamily({
 // rename to fetch?
 export const getGrant = async (setGrant, address) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
-    const vesterContract = new ethers.Contract("0x68B1D87F95878fE05B998F19b66F4baba5De1aed", vesterAbi.abi, provider); // should be provider.getSigner() ?
+    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
     const grantData = await vesterContract.grants(address)
     const amountVested = await vesterContract.amountVested(address)
@@ -66,7 +66,7 @@ export const getGrants = async (setGrant) => {
 }
 
 export const redeemGrant = async (provider, address, setGrant) => {
-    const vesterContract = new ethers.Contract("0x68B1D87F95878fE05B998F19b66F4baba5De1aed", vesterAbi.abi, provider); // should be provider.getSigner() ?
+    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
     const submitToastEvent = () => {
         toast({
