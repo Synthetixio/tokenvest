@@ -14,32 +14,30 @@ export const grantState = selectorFamily({
     get: (address) => ({ get }) => {
         return get(grantsState)[address];
     },
-
     set: (address) => ({ get, set }, newValue) => {
-        alert('hey')
-        // this probably isn't quite right
-        set(Object.assign({}, get(grantsState)[address], newValue))
-    },
-
+        let wrappedNewValue = {}
+        wrappedNewValue[address] = newValue
+        set(grantsState, Object.assign({}, get(grantsState), wrappedNewValue))
+    }
 });
-// https://recoiljs.org/docs/api-reference/core/selector/#writeable-selectors
 
 
 /**** ACTIONS ****/
 
-// rename to fetch? return collected promise? Want these to allow resolution for loading state
-export const getGrant = async (address) => {
+// rename to fetch?
+export const getGrant = async (setGrant, address) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
-    const vesterContract = new ethers.Contract("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", vesterAbi.abi, provider);
+    const vesterContract = new ethers.Contract("0x610178dA211FEF7D417bC0e6FeD39F05609AD788", vesterAbi.abi, provider);
 
     const grantData = await vesterContract.grants(address)
     const amountVested = await vesterContract.amountVested(address)
 
-    debugger;
-    grantState(address).set({
+    setGrant({
         amountVested,
         ...grantData
     })
+
+    return Promise.all([grantData, amountVested])
 }
 
 export const getGrants = async () => {

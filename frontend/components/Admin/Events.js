@@ -13,7 +13,7 @@ export default function Events() {
 
   const wallet = useWallet()
   const provider = new ethers.providers.Web3Provider(wallet.ethereum)
-  const vesterContract = new ethers.Contract("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", vesterAbi.abi, provider.getSigner());
+  const vesterContract = new ethers.Contract("0x610178dA211FEF7D417bC0e6FeD39F05609AD788", vesterAbi.abi, provider.getSigner());
 
   useEffect(async () => {
     let newEvents = []

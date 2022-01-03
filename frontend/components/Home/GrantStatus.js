@@ -10,15 +10,17 @@ import { grantState, getGrant } from '../../lib/store/grants'
 
 export default function GrantStatus() {
   const wallet = useWallet()
-  const [grant] = useRecoilState(grantState(wallet.account));
+  const [grant, setGrant] = useRecoilState(grantState(wallet.account));
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    getGrant(wallet.account).then(setLoadingData(false))
+    getGrant(setGrant, wallet.account).then(() => {
+      setLoadingData(false)
+    })
   }, [])
 
-  if (!loadingData && grant) {
-    const vested = parseFloat(ethers.utils.formatUnits(grant.amountVested, 18));
+  if (!loadingData) {
+    const amountVested = parseFloat(ethers.utils.formatUnits(grant.amountVested, 18));
     const totalAmount = parseFloat(ethers.utils.formatUnits(grant.totalAmount, 18));
     const quarterlyAmount = parseFloat(ethers.utils.formatUnits(grant.quarterlyAmount, 18));
     const startTimestamp = parseInt(grant.startTimestamp);
@@ -35,8 +37,6 @@ export default function GrantStatus() {
       ))
     );
   }
-
-  loadingData = true
 
   return (
     <Box
@@ -61,9 +61,9 @@ export default function GrantStatus() {
               }
             </Box>
             <Box width="50%">
-              <Heading size="md" fontWeight="medium" mb={1}>{(vested / totalAmount * 100).toLocaleString()}% Vested</Heading>
-              <Progress colorScheme='green' size='sm' borderRadius={8} value={vested / totalAmount * 100} />
-              <Text opacity={0.8} fontSize="sm">{vested && vested.toLocaleString()} SNX of {totalAmount && totalAmount.toLocaleString()} SNX</Text>
+              <Heading size="md" fontWeight="medium" mb={1}>{(amountVested / totalAmount * 100).toLocaleString()}% Vested</Heading>
+              <Progress colorScheme='green' size='sm' borderRadius={8} value={amountVested / totalAmount * 100} />
+              <Text opacity={0.8} fontSize="sm">{amountVested && amountVested.toLocaleString()} SNX of {totalAmount && totalAmount.toLocaleString()} SNX</Text>
             </Box>
           </Flex>
         </>

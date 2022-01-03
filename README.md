@@ -15,4 +15,5 @@
 * Run `npx hardhat node`
 * Update testAddress in local-deploy script
 * In a seperate tab, `npx hardhat run --network localhost scripts/local-deploy.js`
+* Update FE with new addresses
 * Then start the front end, `cd frontend && npm run dev`

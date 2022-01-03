@@ -13,7 +13,7 @@ export default function RecentActivity() {
 
   const wallet = useWallet()
   const provider = new ethers.providers.Web3Provider(wallet.ethereum)
-  const vesterContract = new ethers.Contract("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", vesterAbi.abi, provider.getSigner());
+  const vesterContract = new ethers.Contract("0x610178dA211FEF7D417bC0e6FeD39F05609AD788", vesterAbi.abi, provider.getSigner());
 
   useEffect(async () => {
     let newEvents = []
@@ -64,7 +64,7 @@ export default function RecentActivity() {
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :
         <>
           {events.length ? events.map((event, ind) => {
-            return (<Box borderBottom={ind + 1 != events.length && "1px solid rgba(0,0,0,0.33)"} py={4}>
+            return (<Box borderBottom={ind + 1 != events.length && "1px solid rgba(0,0,0,0.33)"} py={4} key={ind}>
 
               <Flex w="100%" mb={3} alignItems="baseline">
 
