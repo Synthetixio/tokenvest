@@ -1,87 +1,34 @@
 import { useState, useEffect } from 'react';
 import { useWallet } from 'use-wallet'
-import { Heading, Input, Button, FormControl, FormHelperText, Flex, Box, FormLabel, Text, Spinner, createStandaloneToast } from '@chakra-ui/react'
+import { Heading, Input, Button, FormControl, FormHelperText, Flex, Box, FormLabel, Text, Spinner } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { BsCash } from 'react-icons/bs'
 import { ethers } from 'ethers'
-import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
-import theme from '../../styles/theme'
-import { parseErrorMessage } from '../../lib/utils/helpers'
+import { useRecoilState } from 'recoil'
+import { grantState, getGrant, redeemGrant } from '../../lib/store/grants'
 
 export default function ReedemSnx() {
-  const [loadingData, setLoadingData] = useState(true);
-  const [loadingRedemption, setLoadingRedemption] = useState(false);
-  const [vested, setVested] = useState(0);
-  const [redeemed, setRedeemed] = useState(0);
-  const [available, setAvailable] = useState(0);
-
-  const toast = createStandaloneToast({ theme })
-
   const wallet = useWallet()
   const provider = new ethers.providers.Web3Provider(wallet.ethereum)
-  const vesterContract = new ethers.Contract("0x610178dA211FEF7D417bC0e6FeD39F05609AD788", vesterAbi.abi, provider.getSigner());
+  const [grant, setGrant] = useRecoilState(grantState(wallet.account));
+  const [loadingData, setLoadingData] = useState(true);
+  const [loadingRedemption, setLoadingRedemption] = useState(false);
 
   useEffect(() => {
-    loadData();
-
-    provider.once("block", () => { // only trigger on new blocks
-      vesterContract.on('Redemption', async (sender, amount) => {
-        if (wallet.account == sender) {
-          toast({
-            title: 'Redemption Successful',
-            description: `You have redeemed ${(amount / 10 ** 18).toLocaleString()} SNX.`,
-            status: 'success',
-            position: 'top',
-            duration: 10000,
-            isClosable: true,
-          })
-        }
-        await loadData()
-      })
+    getGrant(setGrant, wallet.account).then(() => {
+      setLoadingData(false)
     })
   }, [])
 
-  const loadData = async () => {
-    const vested = await vesterContract.amountVested(wallet.account)
-    setVested(parseFloat(ethers.utils.formatUnits(vested, 18)))
-
-    const grantData = await vesterContract.grants(wallet.account)
-    setRedeemed(parseFloat(ethers.utils.formatUnits(grantData.amountRedeemed, 18)))
-
-    const available = await vesterContract.availableForRedemption(wallet.account)
-    setAvailable(parseFloat(ethers.utils.formatUnits(available, 18)))
-
-    Promise.all([vested, grantData, available]).then(setLoadingData(false))
+  if (!loadingData) {
+    const vested = parseFloat(ethers.utils.formatUnits(grant.amountVested, 18))
+    const redeemed = parseFloat(ethers.utils.formatUnits(grant.amountRedeemed, 18));
+    const available = parseFloat(ethers.utils.formatUnits(grant.amountAvailable, 18));
   }
-
-  const submitToastEvent = () => {
-    toast({
-      title: 'Redemption Submitted',
-      description:
-        'A notice will appear here after the redemption has been successfully processed. Refer to your wallet for the latest status.',
-      status: 'info',
-      position: 'top',
-      duration: 10000,
-      isClosable: true,
-    })
-  }
-
-  const errorToastEvent = (error) => {
-    toast({
-      title: 'Error',
-      description: parseErrorMessage(error),
-      status: 'error',
-      position: 'top',
-      isClosable: true,
-    })
-  }
-
 
   const redeem = () => {
     setLoadingRedemption(true)
-    vesterContract.connect(provider.getSigner()).redeem()
-      .then(submitToastEvent)
-      .catch(errorToastEvent)
+    redeemGrant(provider, wallet.account, setGrant)
       .finally(() => {
         setLoadingRedemption(false)
       })
@@ -139,3 +86,4 @@ export default function ReedemSnx() {
     </Box>
   )
 }
+

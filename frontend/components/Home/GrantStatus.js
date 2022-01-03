@@ -14,7 +14,7 @@ export default function GrantStatus() {
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    getGrant(setGrant, wallet.account).then(() => {
+    getGrant(setGrant, wallet.account).finally(() => {
       setLoadingData(false)
     })
   }, [])
