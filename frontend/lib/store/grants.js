@@ -90,8 +90,7 @@ export const redeemGrant = async (provider, address, setGrant) => {
         })
     }
 
-    // TODO: is this working properly?
-    provider.once("block", () => { // only trigger on new blocks
+    provider.once("block", () => {
         vesterContract.once('Redemption', async (sender, amount) => {
             if (address == sender) {
                 toast({
