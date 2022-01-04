@@ -4,10 +4,10 @@ import { BsCalendarWeek } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import { format, formatDistanceToNow, formatDistance } from 'date-fns'
 import { useRecoilState } from 'recoil'
-import { eventsStateByTokenId } from '../../../lib/store/events'
+import { getEventsByTokenId, getEvents } from '../../lib/store/events'
 
 export default function RecentActivity({ tokenId }) {
-  const [events] = useRecoilState(eventsStateByTokenId(tokenId));
+  const [events] = useRecoilState(tokenId != undefined ? getEventsByTokenId(tokenId) : getEvents);
 
   return (
     <Box

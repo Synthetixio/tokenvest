@@ -1,4 +1,4 @@
-import { atom, selectorFamily } from "recoil";
+import { atom, selector, selectorFamily } from "recoil";
 import { ethers } from 'ethers'
 import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 
@@ -6,11 +6,21 @@ import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 
 export const eventsState = atom({
     key: 'eventsState',
-    default: {},
+    default: {}
 });
 
-export const eventsStateByTokenId = selectorFamily({
-    key: 'eventsState',
+export const getEvents = selector({
+    key: 'getEvents',
+    get: ({ get }) => {
+        return Object.values(get(eventsState))
+    },
+    set: () => ({ get, set }, newValue) => {
+        set(eventsState, Object.assign({}, get(eventsState), newValue))
+    }
+});
+
+export const getEventsByTokenId = selectorFamily({
+    key: 'getEventsByTokenId',
     get: (tokenId) => ({ get }) => {
         return Object.values(get(eventsState)).filter((e) => e.tokenId == tokenId)
     },
@@ -22,7 +32,7 @@ export const eventsStateByTokenId = selectorFamily({
 
 /**** ACTIONS ****/
 
-export const getEvents = async (setEvents) => {
+export const fetchEvents = async (setEvents) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 

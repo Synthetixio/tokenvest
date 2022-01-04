@@ -1,8 +1,6 @@
 import { useWallet } from 'use-wallet'
 import { Text } from '@chakra-ui/react'
-import Grants from '../components/Admin/Grants'
-import TokenBalance from '../components/Admin/TokenBalance'
-import Events from '../components/Admin/Events'
+import AdminPanel from '../components/Admin/AdminPanel'
 
 export default function Admin() {
   const wallet = useWallet()
@@ -11,11 +9,7 @@ export default function Admin() {
     <div>
       <main>
         {wallet.status === 'connected' ? (
-          <>
-            <Grants />
-            <TokenBalance />
-            <Events />
-          </>
+          <AdminPanel />
         ) : (
           <Text textAlign="center" py={16} fontWeight="thin" fontSize="3xl" letterSpacing={1.5}>Connect your wallet to manage grants.</Text>
         )}

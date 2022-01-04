@@ -4,10 +4,10 @@ import { BsClockHistory } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import { useRecoilState } from 'recoil'
 import { format, formatDistanceToNowStrict, formatDistance } from 'date-fns'
-import { grantState } from '../../../lib/store/grants'
+import { getGrant } from '../../../lib/store/grants'
 
 export default function GrantStatus({ tokenId }) {
-  const [grant] = useRecoilState(grantState(tokenId));
+  const [grant] = useRecoilState(getGrant(tokenId));
 
   const amountVested = parseFloat(ethers.utils.formatUnits(grant.amountVested, 18));
   const totalAmount = parseFloat(ethers.utils.formatUnits(grant.totalAmount, 18));

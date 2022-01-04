@@ -4,12 +4,12 @@ import { Icon } from '@chakra-ui/icons'
 import { BsCash } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import { useRecoilState } from 'recoil'
-import { grantState, redeemGrant } from '../../../lib/store/grants'
-import { eventsStateByTokenId } from '../../../lib/store/events'
+import { getGrant, redeemGrant } from '../../../lib/store/grants'
+import { getEventsByTokenId } from '../../../lib/store/events'
 
 export default function ReedemSnx({ tokenId }) {
-  const [grant, setGrant] = useRecoilState(grantState(tokenId));
-  const [events, setEvents] = useRecoilState(eventsStateByTokenId(tokenId));
+  const [grant, setGrant] = useRecoilState(getGrant(tokenId));
+  const [events, setEvents] = useRecoilState(getEventsByTokenId(tokenId));
 
   const [loadingRedemption, setLoadingRedemption] = useState(false);
 

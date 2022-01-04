@@ -4,20 +4,20 @@ import { Box, Text, Spinner, Link } from '@chakra-ui/react'
 import { InfoOutlineIcon } from '@chakra-ui/icons'
 import GrantStatus from './GrantStatus'
 import RedeemSnx from './RedeemSnx'
-import RecentActivity from './RecentActivity'
+import RecentActivity from '../../shared/RecentActivity'
 import { useRecoilState } from 'recoil'
-import { grantsStateByUser, getGrants } from '../../../lib/store/grants'
-import { eventsState, getEvents } from '../../../lib/store/events'
+import { getGrantsByUser, fetchGrants } from '../../../lib/store/grants'
+import { eventsState, fetchEvents } from '../../../lib/store/events'
 
-export default function Home() {
+export default function UserGrants() {
   const wallet = useWallet()
 
-  const [grants, setGrant] = useRecoilState(grantsStateByUser(wallet.account));
+  const [grants, setGrant] = useRecoilState(getGrantsByUser(wallet.account));
   const [events, setEvents] = useRecoilState(eventsState);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    Promise.all([getEvents(setEvents), getGrants(setGrant)]).finally(() => {
+    Promise.all([fetchEvents(setEvents), fetchGrants(setGrant)]).finally(() => {
       setLoadingData(false)
     })
   }, [])

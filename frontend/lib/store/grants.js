@@ -4,7 +4,7 @@ import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 import { parseErrorMessage } from '../../lib/utils/helpers'
 import { createStandaloneToast } from '@chakra-ui/react'
 import theme from '../../styles/theme'
-import { getEvents } from "./events";
+import { fetchEvents } from "./events";
 
 const toast = createStandaloneToast({ theme })
 
@@ -15,8 +15,8 @@ export const grantsState = atom({
     default: {},
 });
 
-export const grantState = selectorFamily({
-    key: 'grantState',
+export const getGrant = selectorFamily({
+    key: 'getGrant',
     get: (tokenId) => ({ get }) => {
         return get(grantsState)[tokenId];
     },
@@ -27,8 +27,8 @@ export const grantState = selectorFamily({
     }
 });
 
-export const grantsStateByUser = selectorFamily({
-    key: 'grantState',
+export const getGrantsByUser = selectorFamily({
+    key: 'getGrantsByUser',
     get: (address) => ({ get }) => {
         return Object.values(get(grantsState)).filter((g) => g.owner == address)
     },
@@ -43,7 +43,7 @@ export const grantsStateByUser = selectorFamily({
 /**** ACTIONS ****/
 
 // rename to fetch?
-export const getGrant = async (setGrant, tokenId) => {
+export const fetchGrant = async (setGrant, tokenId) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
@@ -63,7 +63,7 @@ export const getGrant = async (setGrant, tokenId) => {
     return Promise.all([grantData, amountVested, amountAvailable])
 }
 
-export const getGrants = async (setGrant) => {
+export const fetchGrants = async (setGrant) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
@@ -72,7 +72,7 @@ export const getGrants = async (setGrant) => {
     const totalSupply = await vesterContract.totalSupply();
     for (let i = 0; i < totalSupply.toNumber(); i++) {
         const tokenId = await vesterContract.tokenByIndex(i);
-        promises.push(await getGrant(setGrant, tokenId))
+        promises.push(await fetchGrant(setGrant, tokenId))
     }
 
     return Promise.all(promises)
@@ -116,8 +116,8 @@ export const redeemGrant = async (tokenId, setGrant, setEvents) => {
                     isClosable: true,
                 })
             }
-            await getGrant(setGrant, tokenId)
-            await getEvents(setEvents, tokenId)
+            await fetchGrant(setGrant, tokenId)
+            await fetchEvents(setEvents, tokenId)
         })
     })
 

@@ -4,7 +4,7 @@ import { Heading, Flex, Box, Text, Link, Spinner, Spacer } from '@chakra-ui/reac
 import { Icon } from '@chakra-ui/icons'
 import { BsCashStack } from 'react-icons/bs'
 import { ethers } from 'ethers'
-import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
+import vesterAbi from '../../../../artifacts/contracts/Vester.sol/Vester.json'
 import { format, formatDistanceToNow } from 'date-fns'
 
 export default function Events() {
