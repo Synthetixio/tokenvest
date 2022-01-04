@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 contract Vester is ERC721Enumerable {
 
     struct Grant {
-        uint128 quarterlyAmount;
+        uint128 vestAmount;
         uint128 totalAmount;
         uint128 amountRedeemed;
         uint64 startTimestamp;
@@ -74,8 +74,8 @@ contract Vester is ERC721Enumerable {
             return 0;
         }
 
-        // Calculate the number of quarters elapsed (will round down) multiplied by the amount to vest per vesting interval.
-        uint128 amount = ((uint128(block.timestamp) - grants[tokenId].startTimestamp) / grants[tokenId].vestInterval) * grants[tokenId].quarterlyAmount;
+        // Calculate the number of intervals elapsed (will round down) multiplied by the amount to vest per vesting interval.
+        uint128 amount = ((uint128(block.timestamp) - grants[tokenId].startTimestamp) / grants[tokenId].vestInterval) * grants[tokenId].vestAmount;
 
         // The total amount vested cannot exceed total grant size.
         if(amount > grants[tokenId].totalAmount){
@@ -100,19 +100,19 @@ contract Vester is ERC721Enumerable {
     /// @param tokenId The ID of the grant
     /// @param startTimestamp The timestamp defining the start of the vesting schedule
     /// @param cliffTimestamp Before this timestamp, no tokens can be redeemed
-    /// @param quarterlyAmount The amount of tokens that will vest for the recipient each quarter, denominated in tokens * 10^18
+    /// @param vestAmount The amount of tokens that will vest for the recipient each interval, denominated in tokens * 10^18
     /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
-    function updateGrant(uint tokenId, uint64 startTimestamp, uint64 cliffTimestamp, uint128 quarterlyAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {
+    function updateGrant(uint tokenId, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {
         grants[tokenId].startTimestamp = startTimestamp;
         grants[tokenId].cliffTimestamp = cliffTimestamp;
-        grants[tokenId].quarterlyAmount = quarterlyAmount;
+        grants[tokenId].vestAmount = vestAmount;
         grants[tokenId].totalAmount = totalAmount;
         grants[tokenId].amountRedeemed = amountRedeemed;
         grants[tokenId].vestInterval = vestInterval;
 
-        emit GrantUpdate(tokenId, startTimestamp, cliffTimestamp, quarterlyAmount, totalAmount, amountRedeemed, vestInterval);
+        emit GrantUpdate(tokenId, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
     }
 
     /// @notice Create a new grant
@@ -120,13 +120,13 @@ contract Vester is ERC721Enumerable {
     /// @param granteeAddress The address of the grant recipient
     /// @param startTimestamp The timestamp defining the start of the vesting schedule
     /// @param cliffTimestamp Before this timestamp, no tokens can be redeemed
-    /// @param quarterlyAmount The amount of tokens that will vest for the recipient each quarter, denominated in tokens * 10^18
+    /// @param vestAmount The amount of tokens that will vest for the recipient each interval, denominated in tokens * 10^18
     /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
-    function mint(address granteeAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 quarterlyAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) external onlyOwner {
+    function mint(address granteeAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) external onlyOwner {
         _safeMint(granteeAddress, tokenCounter);
-        updateGrant(tokenCounter, startTimestamp, cliffTimestamp, quarterlyAmount, totalAmount, amountRedeemed, vestInterval);
+        updateGrant(tokenCounter, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
         tokenCounter++;
     }
 
@@ -158,7 +158,7 @@ contract Vester is ERC721Enumerable {
     }
 
     event Redemption(uint indexed tokenId, address indexed redeemerAddress, uint128 amount);
-    event GrantUpdate(uint indexed tokenId, uint64 startTimestamp, uint64 cliffTimestamp, uint128 quarterlyAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval);
+    event GrantUpdate(uint indexed tokenId, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval);
     event Withdrawal(address indexed withdrawerAddress, address indexed withdrawalTokenAddress, uint amount);
     event OwnerNomination(address indexed newOwner);
     event OwnerUpdate(address indexed oldOwner, address indexed newOwner);

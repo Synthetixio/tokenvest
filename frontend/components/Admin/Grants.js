@@ -89,7 +89,7 @@ export default function Grants() {
                   <Td>
                     {format(new Date(grant.cliffTimestamp.toNumber() * 1000), 'M/d/yy')}
                   </Td>
-                  <Td>{parseInt(ethers.utils.formatUnits(grant.quarterlyAmount, 18)).toLocaleString()} SNX</Td>
+                  <Td>{parseInt(ethers.utils.formatUnits(grant.vestAmount, 18)).toLocaleString()} SNX</Td>
                   <Td>{parseInt(ethers.utils.formatUnits(grant.totalAmount, 18)).toLocaleString()} SNX</Td>
                   <Td>{parseInt(ethers.utils.formatUnits(grant.amountRedeemed, 18)).toLocaleString()} SNX</Td>
                   <Td><EditIcon /></Td>

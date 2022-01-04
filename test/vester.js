@@ -54,7 +54,7 @@ describe("Vester", function () {
     await this.vester.mint(grantee.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
     const grantData = await this.vester.grants(0)
 
-    expect(grantData.quarterlyAmount).to.equal(ethers.utils.parseEther("2500"))
+    expect(grantData.vestAmount).to.equal(ethers.utils.parseEther("2500"))
     expect(grantData.totalAmount).to.equal(ethers.utils.parseEther("30000"))
     expect(grantData.amountRedeemed).to.equal(0)
     expect(grantData.startTimestamp.toNumber()).to.be.closeTo(Date.now() / 1000, 100)
@@ -68,7 +68,7 @@ describe("Vester", function () {
 
     await this.vester.mint(grantee.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
     let grantData = await this.vester.grants(0)
-    expect(grantData.quarterlyAmount).to.equal(ethers.utils.parseEther("2500"))
+    expect(grantData.vestAmount).to.equal(ethers.utils.parseEther("2500"))
     expect(grantData.totalAmount).to.equal(ethers.utils.parseEther("30000"))
     expect(grantData.amountRedeemed).to.equal(0)
 
@@ -83,7 +83,7 @@ describe("Vester", function () {
     );
 
     grantData = await this.vester.grants(0)
-    expect(grantData.quarterlyAmount).to.equal(ethers.utils.parseEther("3000"))
+    expect(grantData.vestAmount).to.equal(ethers.utils.parseEther("3000"))
     expect(grantData.totalAmount).to.equal(ethers.utils.parseEther("40000"))
     expect(grantData.amountRedeemed).to.equal(0)
   })

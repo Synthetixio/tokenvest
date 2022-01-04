@@ -40,7 +40,7 @@ export default function Events() {
         transactionHash: log.transactionHash,
         startTimestamp: log.args.startTimestamp,
         cliffTimestamp: log.args.cliffTimestamp,
-        quarterlyAmount: log.args.quarterlyAmount,
+        vestAmount: log.args.vestAmount,
         totalAmount: log.args.totalAmount,
         amountRedeemed: log.args.amountRedeemed,
         address: log.args.granteeAddress ? log.args.granteeAddress : log.args.redeemerAddress
@@ -111,7 +111,7 @@ export default function Events() {
                 <Spacer />
                 <Box>
                   <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8}>Vest per qtr.</Text>
-                  <Text fontSize="sm">{parseInt(ethers.utils.formatUnits(event.quarterlyAmount, 18)).toLocaleString()} SNX</Text>
+                  <Text fontSize="sm">{parseInt(ethers.utils.formatUnits(event.vestAmount, 18)).toLocaleString()} SNX</Text>
                 </Box>
                 <Spacer />
                 <Box>

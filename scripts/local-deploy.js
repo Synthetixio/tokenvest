@@ -19,7 +19,7 @@ async function main() {
     "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
     Math.floor(Date.now() / 1000) - (7889400 * 2), // start timestamp
     Math.floor(Date.now() / 1000) - (7889400 * 1), // cliff timestamp
-    ethers.utils.parseEther("2500"), // quarterly amount
+    ethers.utils.parseEther("2500"), // vest amount
     ethers.utils.parseEther("30000"), // total
     ethers.utils.parseEther("2500"), // redeemed
     7889400 // vest interval

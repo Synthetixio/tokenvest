@@ -3,7 +3,7 @@ import { Icon } from '@chakra-ui/icons'
 import { BsClockHistory } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import { useRecoilState } from 'recoil'
-import { format, formatDistanceToNowStrict } from 'date-fns'
+import { format, formatDistanceToNowStrict, formatDistance } from 'date-fns'
 import { grantState } from '../../../lib/store/grants'
 
 export default function GrantStatus({ tokenId }) {
@@ -11,9 +11,10 @@ export default function GrantStatus({ tokenId }) {
 
   const amountVested = parseFloat(ethers.utils.formatUnits(grant.amountVested, 18));
   const totalAmount = parseFloat(ethers.utils.formatUnits(grant.totalAmount, 18));
-  const quarterlyAmount = parseFloat(ethers.utils.formatUnits(grant.quarterlyAmount, 18));
+  const vestAmount = parseFloat(ethers.utils.formatUnits(grant.vestAmount, 18));
   const startTimestamp = parseInt(grant.startTimestamp);
   const cliffTimestamp = parseInt(grant.cliffTimestamp);
+  const vestInterval = parseInt(grant.vestInterval);
 
   let nextQuarter = startTimestamp
   while (nextQuarter < Date.now() / 1000) {
@@ -25,6 +26,7 @@ export default function GrantStatus({ tokenId }) {
       nextQuarter * 1000
     ))
   );
+  const intervalInWords = formatDistance(new Date(0), new Date(vestInterval * 1000))
 
   return (
     <Box
@@ -37,12 +39,12 @@ export default function GrantStatus({ tokenId }) {
       <Flex align="center">
         <Box width="50%" pr={4}>
           {cliffTimestamp > Date.now() / 1000 ?
-            <>Your grant will vest {quarterlyAmount.toLocaleString()} SNX each quarter with a cliff on {format(new Date(cliffTimestamp * 1000), 'M/dd/yyyy')}.</>
+            <>Your grant will vest {vestAmount.toLocaleString()} SNX every {intervalInWords} with a cliff on {format(new Date(cliffTimestamp * 1000), 'M/dd/yyyy')}.</>
             :
             amountVested == totalAmount ?
               <Text>Your grant has completely vested.</Text>
               :
-              <Text>Your grant vests quarterly. Your next {quarterlyAmount.toLocaleString()} SNX will vest in {nextVest}.</Text>
+              <Text>Your grant vests every {intervalInWords}. Your next {vestAmount.toLocaleString()} SNX will vest in {nextVest}.</Text>
           }
         </Box>
         <Box width="50%">

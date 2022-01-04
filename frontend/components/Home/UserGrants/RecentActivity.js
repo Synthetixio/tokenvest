@@ -50,8 +50,8 @@ export default function RecentActivity({ tokenId }) {
             </Box>
             <Spacer />
             <Box>
-              <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8}>Vest per qtr.</Text>
-              <Text fontSize="sm">{parseInt(ethers.utils.formatUnits(event.quarterlyAmount, 18)).toLocaleString()} SNX</Text>
+              <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8}>Vest Amount</Text>
+              <Text fontSize="sm">{parseInt(ethers.utils.formatUnits(event.vestAmount, 18)).toLocaleString()} SNX</Text>
             </Box>
             <Spacer />
             <Box>
