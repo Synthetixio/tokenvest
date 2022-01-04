@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useWallet } from 'use-wallet'
+import { useState } from 'react';
 import { Heading, Input, Button, FormControl, FormHelperText, Flex, Box, FormLabel, Text, Spinner } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { BsCash } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import { useRecoilState } from 'recoil'
 import { grantState, redeemGrant } from '../../../lib/store/grants'
+import { eventsStateByTokenId } from '../../../lib/store/events'
 
-export default function ReedemSnx() {
-  const wallet = useWallet()
-  const [grant, setGrant] = useRecoilState(grantState(wallet.account));
+export default function ReedemSnx({ tokenId }) {
+  const [grant, setGrant] = useRecoilState(grantState(tokenId));
+  const [events, setEvents] = useRecoilState(eventsStateByTokenId(tokenId));
+
   const [loadingRedemption, setLoadingRedemption] = useState(false);
 
   const vested = parseFloat(ethers.utils.formatUnits(grant.amountVested, 18))
@@ -18,7 +19,7 @@ export default function ReedemSnx() {
 
   const redeem = () => {
     setLoadingRedemption(true)
-    redeemGrant(grant.tokenId, setGrant)
+    redeemGrant(grant.tokenId, setGrant, setEvents)
       .finally(() => {
         setLoadingRedemption(false)
       })

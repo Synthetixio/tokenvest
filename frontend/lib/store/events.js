@@ -1,16 +1,6 @@
 import { atom, selectorFamily } from "recoil";
 import { ethers } from 'ethers'
-import { useWallet } from 'use-wallet'
 import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
-
-const wallet = useWallet()
-const provider = new ethers.providers.Web3Provider(wallet.ethereum)
-const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider.getSigner());
-
-// These should all be promises
-
-// getEvents
-// getAllEvents
 
 /**** STATE ****/
 
@@ -19,32 +9,50 @@ export const eventsState = atom({
     default: {},
 });
 
-export const eventsStateByUser = selectorFamily({
+export const eventsStateByTokenId = selectorFamily({
     key: 'eventsState',
-    get: (address) => ({ get }) => {
-        return Object.values(get(eventsState))// TODO: fix me: .filter((g) => g.owner == address)
+    get: (tokenId) => ({ get }) => {
+        return Object.values(get(eventsState)).filter((e) => e.tokenId == tokenId)
     },
-    set: (eventId) => ({ get, set }, newValue) => {
-        let wrappedNewValue = {}
-        wrappedNewValue[eventId] = newValue
-        set(eventsState, Object.assign({}, get(eventsState), wrappedNewValue))
+    set: () => ({ get, set }, newValue) => {
+        set(eventsState, Object.assign({}, get(eventsState), newValue))
     }
 });
 
 
 /**** ACTIONS ****/
 
-export const getEvents = async (setEvent) => {
+export const getEvents = async (setEvents) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
-    let promises = []
+    let newEvents = {}
 
-    const totalSupply = await vesterContract.totalSupply();
-    for (let i = 0; i < totalSupply.toNumber(); i++) {
-        const tokenId = await vesterContract.tokenByIndex(i);
-        promises.push(await getGrant(setGrant, tokenId))
+    // TODO: Make below more abstract, just gather all events
+    const redemptionsFilter = vesterContract.filters.Redemption();
+    const redemptionsEvents = await vesterContract.queryFilter(redemptionsFilter, 0, "latest");
+    for (const log of redemptionsEvents) {
+        newEvents[`${log.transactionHash}-${log.logIndex}`] = {
+            type: "Redemption",
+            blockNumber: log.blockNumber,
+            timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
+            transactionHash: log.transactionHash,
+            ...log.args
+        }
     }
 
-    return Promise.all(promises)
+    const grantUpdateFilter = vesterContract.filters.GrantUpdate();
+    const grantUpdateEvents = await vesterContract.queryFilter(grantUpdateFilter, 0, "latest");
+    for (const log of grantUpdateEvents) {
+        newEvents[`${log.transactionHash}-${log.logIndex}`] = {
+            type: "Grant Update",
+            blockNumber: log.blockNumber,
+            timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
+            transactionHash: log.transactionHash,
+            ...log.args
+        }
+    }
+
+    setEvents(newEvents)
+    return Promise.all([redemptionsEvents, grantUpdateEvents])
 }

@@ -1,16 +1,13 @@
-import { useState, useEffect } from 'react'
-import { Heading, Progress, Flex, Box, Text, Spinner } from '@chakra-ui/react'
+import { Heading, Progress, Flex, Box, Text } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { BsClockHistory } from 'react-icons/bs'
-import { useWallet } from 'use-wallet'
 import { ethers } from 'ethers'
 import { useRecoilState } from 'recoil'
 import { format, formatDistanceToNowStrict } from 'date-fns'
-import { grantState, getUserGrants } from '../../../lib/store/grants'
+import { grantState } from '../../../lib/store/grants'
 
-export default function GrantStatus() {
-  const wallet = useWallet()
-  const [grant, setGrant] = useRecoilState(grantState(wallet.account));
+export default function GrantStatus({ tokenId }) {
+  const [grant] = useRecoilState(grantState(tokenId));
 
   const amountVested = parseFloat(ethers.utils.formatUnits(grant.amountVested, 18));
   const totalAmount = parseFloat(ethers.utils.formatUnits(grant.totalAmount, 18));

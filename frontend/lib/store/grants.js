@@ -4,6 +4,7 @@ import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 import { parseErrorMessage } from '../../lib/utils/helpers'
 import { createStandaloneToast } from '@chakra-ui/react'
 import theme from '../../styles/theme'
+import { getEvents } from "./events";
 
 const toast = createStandaloneToast({ theme })
 
@@ -31,9 +32,9 @@ export const grantsStateByUser = selectorFamily({
     get: (address) => ({ get }) => {
         return Object.values(get(grantsState)).filter((g) => g.owner == address)
     },
-    set: (tokenId) => ({ get, set }, newValue) => {
+    set: () => ({ get, set }, newValue) => {
         let wrappedNewValue = {}
-        wrappedNewValue[tokenId] = newValue
+        wrappedNewValue[newValue.tokenId] = newValue
         set(grantsState, Object.assign({}, get(grantsState), wrappedNewValue))
     }
 });
@@ -77,7 +78,7 @@ export const getGrants = async (setGrant) => {
     return Promise.all(promises)
 }
 
-export const redeemGrant = async (tokenId, setGrant) => {
+export const redeemGrant = async (tokenId, setGrant, setEvents) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum) //or should this be passed in?
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
@@ -116,7 +117,7 @@ export const redeemGrant = async (tokenId, setGrant) => {
                 })
             }
             await getGrant(setGrant, tokenId)
-            // TODO: Reload events here
+            await getEvents(setEvents, tokenId)
         })
     })
 
