@@ -4,7 +4,7 @@ import { Heading, Flex, Box, Text, Link, Spinner, Spacer } from '@chakra-ui/reac
 import { Icon, TimeIcon } from '@chakra-ui/icons'
 import { BsCalendarWeek } from 'react-icons/bs'
 import { ethers } from 'ethers'
-import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
+import vesterAbi from '../../../../artifacts/contracts/Vester.sol/Vester.json'
 import { format, formatDistanceToNow } from 'date-fns'
 
 export default function RecentActivity() {
@@ -54,7 +54,7 @@ export default function RecentActivity() {
 
   return (
     <Box
-      mb={8}
+      mb={4}
       borderRadius="md"
       background="gray.900"
       py={5}
@@ -117,7 +117,7 @@ export default function RecentActivity() {
 
             </Box>)
           }) : (<Text textAlign="center" mt={6} mb={3}>
-            No activity found for a grant associated with your address.
+            No activity found for this grant.
           </Text>)}
 
         </>

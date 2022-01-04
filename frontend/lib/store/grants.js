@@ -16,12 +16,24 @@ export const grantsState = atom({
 
 export const grantState = selectorFamily({
     key: 'grantState',
-    get: (address) => ({ get }) => {
-        return get(grantsState)[address];
+    get: (tokenId) => ({ get }) => {
+        return get(grantsState)[tokenId];
     },
-    set: (address) => ({ get, set }, newValue) => {
+    set: (tokenId) => ({ get, set }, newValue) => {
         let wrappedNewValue = {}
-        wrappedNewValue[address] = newValue
+        wrappedNewValue[tokenId] = newValue
+        set(grantsState, Object.assign({}, get(grantsState), wrappedNewValue))
+    }
+});
+
+export const grantsStateByUser = selectorFamily({
+    key: 'grantState',
+    get: (address) => ({ get }) => {
+        return Object.values(get(grantsState)).filter((g) => g.owner == address)
+    },
+    set: (tokenId) => ({ get, set }, newValue) => {
+        let wrappedNewValue = {}
+        wrappedNewValue[tokenId] = newValue
         set(grantsState, Object.assign({}, get(grantsState), wrappedNewValue))
     }
 });
@@ -30,15 +42,18 @@ export const grantState = selectorFamily({
 /**** ACTIONS ****/
 
 // rename to fetch?
-export const getGrant = async (setGrant, address) => {
+export const getGrant = async (setGrant, tokenId) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
-    const grantData = await vesterContract.grants(address)
-    const amountVested = await vesterContract.amountVested(address)
-    const amountAvailable = await vesterContract.availableForRedemption(address)
+    const grantData = await vesterContract.grants(tokenId)
+    const amountVested = await vesterContract.amountVested(tokenId)
+    const amountAvailable = await vesterContract.availableForRedemption(tokenId)
+    const owner = await vesterContract.ownerOf(tokenId)
 
     setGrant({
+        tokenId,
+        owner,
         amountVested,
         amountAvailable,
         ...grantData
@@ -48,24 +63,22 @@ export const getGrant = async (setGrant, address) => {
 }
 
 export const getGrants = async (setGrant) => {
-    let addresses = []
+    const provider = new ethers.providers.Web3Provider(window?.ethereum)
+    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
+
     let promises = []
 
-    // Get all addresses with grants based on events
-    const grantUpdateFilter = vesterContract.filters.GrantUpdate();
-    const grantUpdateEvents = await vesterContract.queryFilter(grantUpdateFilter, 0, "latest");
-    for (const log of grantUpdateEvents) {
-        const address = log.args.granteeAddress
-        if (!addresses.includes(address)) {
-            promises.push(await getGrant(setGrant, address))
-            addresses.push(address)
-        }
+    const totalSupply = await vesterContract.totalSupply();
+    for (let i = 0; i < totalSupply.toNumber(); i++) {
+        const tokenId = await vesterContract.tokenByIndex(i);
+        promises.push(await getGrant(setGrant, tokenId))
     }
 
     return Promise.all(promises)
 }
 
-export const redeemGrant = async (provider, address, setGrant) => {
+export const redeemGrant = async (tokenId, setGrant) => {
+    const provider = new ethers.providers.Web3Provider(window?.ethereum) //or should this be passed in?
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
     const submitToastEvent = () => {
@@ -90,9 +103,9 @@ export const redeemGrant = async (provider, address, setGrant) => {
         })
     }
 
-    provider.once("block", () => {
-        vesterContract.once('Redemption', async (sender, amount) => {
-            if (address == sender) {
+    provider.once("block", () => { // Unsure about this wrapping? Originally added to prevent redemptions from old blocks rendering.
+        vesterContract.once('Redemption', async (redeemedTokenId, address, amount) => {
+            if (tokenId.toNumber() == redeemedTokenId.toNumber()) {
                 toast({
                     title: 'Redemption Successful',
                     description: `You have redeemed ${(amount / 10 ** 18).toLocaleString()} SNX.`,
@@ -102,12 +115,12 @@ export const redeemGrant = async (provider, address, setGrant) => {
                     isClosable: true,
                 })
             }
-            await getGrant(setGrant, address)
+            await getGrant(setGrant, tokenId)
             // TODO: Reload events here
         })
     })
 
-    return await vesterContract.connect(provider.getSigner()).redeem()
+    return await vesterContract.connect(provider.getSigner()).redeem(tokenId)
         .then(submitToastEvent)
         .catch(errorToastEvent)
 }
