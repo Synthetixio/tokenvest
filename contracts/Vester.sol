@@ -2,11 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
 /// @title Vesting Contract
 /// @author Noah Litvin (@noahlitvin)
 /// @notice This contract allows the recipient of a grant to redeem tokens each vesting interval, up to a total amount with an optional cliff.
-contract Vester {
+contract Vester is ERC721Enumerable {
 
     struct Grant {
         uint128 quarterlyAmount;
@@ -15,68 +16,70 @@ contract Vester {
         uint64 startTimestamp;
         uint64 cliffTimestamp;
         uint32 vestInterval;
-        address transferNominee;
     }
 
     address public owner;
     address public nominatedOwner;
     address public tokenAddress;
-    mapping (address => Grant) public grants;
+    uint public tokenCounter;
+    mapping (uint => Grant) public grants;
 
-    constructor(address _owner, address _tokenAddress) {
+    constructor(string memory name, string memory symbol, address _owner, address _tokenAddress) ERC721(name, symbol) {
         owner = _owner;
         tokenAddress = _tokenAddress;
     }
 
     /// @notice Redeem all available vested tokens for the calling address
-    function redeem() public {
-        uint128 amount = availableForRedemption(msg.sender);
+    function redeem(uint tokenId) public {
+        require(ownerOf(tokenId) == msg.sender, "You don't own this grant.");
+
+        uint128 amount = availableForRedemption(tokenId);
         require(amount > 0, "You don't have any tokens currently available for redemption.");
 
         IERC20 tokenContract = IERC20(tokenAddress);
         require(tokenContract.balanceOf(address(this)) >= amount, "More tokens must be transferred to this contract before you can redeem.");
 
-        grants[msg.sender].amountRedeemed += amount;
+        grants[tokenId].amountRedeemed += amount;
         tokenContract.transfer(msg.sender, amount);
 
-        emit Redemption(msg.sender, amount);
+        emit Redemption(tokenId, msg.sender, amount);
     }
 
     /// @notice Redeem all available vested tokens for the calling address and transfer in arbitrary tokens (to make this an exchange rather than income)
     /// @param incomingTokenAddress The address of the token being transferred in
     /// @param incomingTokenAmount The amount of the token being transferred in
-    function redeemWithTransfer(address incomingTokenAddress, uint incomingTokenAmount) external {
+    function redeemWithTransfer(uint tokenId, address incomingTokenAddress, uint incomingTokenAmount) external {
         IERC20 incomingTokenContract = IERC20(incomingTokenAddress);
         require(
             incomingTokenContract.transferFrom(msg.sender, address(this), incomingTokenAmount),
             "Incoming tokens failed to transfer."
         );
-        redeem();
+        redeem(tokenId);
     }
 
     /// @notice Calculate the amount of tokens currently available for redemption for a given grantee
     /// @dev This subtracts the amount of previously redeemed token from the total amount that has vested.
-    /// @param redeemerAddress The address of the grantee
+    /// @param tokenId The ID of the grant
     /// @return The amount available for redemption, denominated in tokens * 10^18
-    function availableForRedemption(address redeemerAddress) public view returns (uint128) {
-        return amountVested(redeemerAddress) - grants[redeemerAddress].amountRedeemed;
+    function availableForRedemption(uint tokenId) public view returns (uint128) {
+        return amountVested(tokenId) - grants[tokenId].amountRedeemed;
     }
 
     /// @notice Calculate the amount that has vested for a given address
-    /// @param redeemerAddress The address of the grantee
+    /// @param tokenId The ID of the grant
     /// @return The amount of vested tokens, denominated in tokens * 10^18
-    function amountVested(address redeemerAddress) public view returns (uint128) {
+    function amountVested(uint tokenId) public view returns (uint128) {
         // Nothing has vested until the cliff has past.
-        if(block.timestamp < grants[redeemerAddress].cliffTimestamp){
+        if(block.timestamp < grants[tokenId].cliffTimestamp){
             return 0;
         }
 
         // Calculate the number of quarters elapsed (will round down) multiplied by the amount to vest per vesting interval.
-        uint128 amount = ((uint128(block.timestamp) - grants[redeemerAddress].startTimestamp) / grants[redeemerAddress].vestInterval) * grants[redeemerAddress].quarterlyAmount;
+        uint128 amount = ((uint128(block.timestamp) - grants[tokenId].startTimestamp) / grants[tokenId].vestInterval) * grants[tokenId].quarterlyAmount;
 
         // The total amount vested cannot exceed total grant size.
-        if(amount > grants[redeemerAddress].totalAmount){
-            return grants[redeemerAddress].totalAmount;
+        if(amount > grants[tokenId].totalAmount){
+            return grants[tokenId].totalAmount;
         }
 
         return amount;
@@ -94,6 +97,26 @@ contract Vester {
 
     /// @notice Update the data pertaining to a grant
     /// @dev Only the owner of the contract may call this function.
+    /// @param tokenId The ID of the grant
+    /// @param startTimestamp The timestamp defining the start of the vesting schedule
+    /// @param cliffTimestamp Before this timestamp, no tokens can be redeemed
+    /// @param quarterlyAmount The amount of tokens that will vest for the recipient each quarter, denominated in tokens * 10^18
+    /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
+    /// @param amountRedeemed The amount of tokens already redeemed by this recipient
+    /// @param vestInterval The vesting period in seconds
+    function updateGrant(uint tokenId, uint64 startTimestamp, uint64 cliffTimestamp, uint128 quarterlyAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {
+        grants[tokenId].startTimestamp = startTimestamp;
+        grants[tokenId].cliffTimestamp = cliffTimestamp;
+        grants[tokenId].quarterlyAmount = quarterlyAmount;
+        grants[tokenId].totalAmount = totalAmount;
+        grants[tokenId].amountRedeemed = amountRedeemed;
+        grants[tokenId].vestInterval = vestInterval;
+
+        emit GrantUpdate(tokenId, startTimestamp, cliffTimestamp, quarterlyAmount, totalAmount, amountRedeemed, vestInterval);
+    }
+
+    /// @notice Create a new grant
+    /// @dev Only the owner of the contract may call this function.
     /// @param granteeAddress The address of the grant recipient
     /// @param startTimestamp The timestamp defining the start of the vesting schedule
     /// @param cliffTimestamp Before this timestamp, no tokens can be redeemed
@@ -101,71 +124,17 @@ contract Vester {
     /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
-    function updateGrant(address granteeAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 quarterlyAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {
-        grants[granteeAddress].startTimestamp = startTimestamp;
-        grants[granteeAddress].cliffTimestamp = cliffTimestamp;
-        grants[granteeAddress].quarterlyAmount = quarterlyAmount;
-        grants[granteeAddress].totalAmount = totalAmount;
-        grants[granteeAddress].amountRedeemed = amountRedeemed;
-        grants[granteeAddress].vestInterval = vestInterval;
-
-        emit GrantUpdate(granteeAddress, startTimestamp, cliffTimestamp, quarterlyAmount, totalAmount, amountRedeemed, vestInterval);
+    function mint(address granteeAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 quarterlyAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) external onlyOwner {
+        _safeMint(granteeAddress, tokenCounter);
+        updateGrant(tokenCounter, startTimestamp, cliffTimestamp, quarterlyAmount, totalAmount, amountRedeemed, vestInterval);
+        tokenCounter++;
     }
 
-    /// @notice Create a grant that vests quarterly over three years with a six month cliff
-    /// @dev Only the owner of the contract may call this function. This is a convenience function that wraps updateGrant.
-    /// @param granteeAddress The address of the grant recipient
-    /// @param grantSize The size of the grant, denominated in tokens
-    function createGrant(address granteeAddress, uint128 grantSize) external onlyOwner {
-        updateGrant(
-            granteeAddress,
-            uint64(block.timestamp),
-            uint64(block.timestamp) + 7889400 * 2,
-            grantSize * 1e18 / 4 / 3,
-            grantSize * 1e18,
-            0,
-            7889400
-        );
-    }
-
-    /// @notice Revoke an existing grant
-    /// @dev Only the owner of the contract may call this function. This is a convenience function that wraps updateGrant.
-    /// @param granteeAddress The address of the grantee to revoke
-    function revokeGrant(address granteeAddress) external onlyOwner {
-        updateGrant(
-            granteeAddress,
-            grants[granteeAddress].startTimestamp,
-            grants[granteeAddress].cliffTimestamp,
-            grants[granteeAddress].quarterlyAmount,
-            0,
-            grants[granteeAddress].amountRedeemed,
-            grants[granteeAddress].vestInterval
-        );
-    }
-
-    /// @notice Nominate an address to receive the caller's grant
-    /// @param nominee The address that will be able to accept the grant transfer
-    function nominateGrantTransfer(address nominee) external {
-        grants[msg.sender].transferNominee = nominee;
-
-        emit GrantTransferNomination(msg.sender, nominee);
-    }
-
-    /// @notice Accept a grant transfer, overwriting any existing grant associated with this address
-    /// @param transferer The address currently assigned to the grant the caller is receiving
-    function acceptGrantTransfer(address transferer) external {
-        require(grants[transferer].transferNominee == msg.sender, "You have not been nominated to accept this grant.");
-        
-        // Assign the transferer's grant to the caller
-        grants[msg.sender] = grants[transferer];
-
-        // Effectively revoke the transferer's grant
-        grants[transferer].totalAmount = 0;
-
-        // Prevent the recipient from transfering a future grant from the recipient unless nominated again
-        grants[transferer].transferNominee = address(0);
-
-        emit GrantTransferAcceptance(transferer, msg.sender);
+    /// @notice Destroy a grant
+    /// @dev Only the owner of the contract may call this function.
+    /// @param tokenId The ID of the grant
+    function burn(uint tokenId) external onlyOwner {
+        _burn(tokenId);
     }
 
     /// @notice Nominate a new owner
@@ -188,11 +157,9 @@ contract Vester {
         _;
     }
 
-    event GrantUpdate(address indexed granteeAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 quarterlyAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval);
-    event Redemption(address indexed redeemerAddress, uint128 amount);
+    event Redemption(uint indexed tokenId, address indexed redeemerAddress, uint128 amount);
+    event GrantUpdate(uint indexed tokenId, uint64 startTimestamp, uint64 cliffTimestamp, uint128 quarterlyAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval);
     event Withdrawal(address indexed withdrawerAddress, address indexed withdrawalTokenAddress, uint amount);
-    event GrantTransferNomination(address indexed sender, address indexed recipient);
-    event GrantTransferAcceptance(address indexed sender, address indexed recipient);
     event OwnerNomination(address indexed newOwner);
     event OwnerUpdate(address indexed oldOwner, address indexed newOwner);
 }

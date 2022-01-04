@@ -10,12 +10,12 @@ async function main() {
   const sampleToken = await SampleToken.deploy();
 
   const Vester = await hre.ethers.getContractFactory("Vester");
-  const vester = await Vester.deploy(testerAddress, sampleToken.address);
+  const vester = await Vester.deploy("SNX Grant", "gSNX", testerAddress, sampleToken.address);
 
   await vester.deployed();
 
   await sampleToken.mint(vester.address, ethers.utils.parseEther("30000"))
-  await vester.updateGrant(
+  await vester.mint(
     "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
     Math.floor(Date.now() / 1000) - (7889400 * 2), // start timestamp
     Math.floor(Date.now() / 1000) - (7889400 * 1), // cliff timestamp
@@ -29,7 +29,6 @@ async function main() {
   console.log("Sample Token deployed to:", sampleToken.address);
 
   const data = `NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS=${vester.address}\nNEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS=${sampleToken.address}`
-  //const data = "Test"
   fs.writeFileSync("frontend/.env.local", data);
 
   console.log("frontend/.env.local updated")
