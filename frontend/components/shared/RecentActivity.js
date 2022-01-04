@@ -23,6 +23,15 @@ export default function RecentActivity({ tokenId }) {
             <Heading d="inline" size="md" fontWeight="medium" mr={3}>
               {event.type == "Grant Update" && ind == events.length - 1 ? "Grant Issuance" : event.type}
             </Heading>
+            {tokenId == undefined &&
+              <Text
+                d="inline"
+                mr={3}
+                fontSize="sm"
+                transform="translateY(-1px)"
+                borderRadius={1}
+                lineHeight={1.2}>Grant #{event.tokenId.toNumber()}</Text>
+            }
             <Link
               d="inline"
               fontSize="sm"
