@@ -44,7 +44,6 @@ export default function RecentActivity({ tokenId }) {
               <Text>{format(new Date(event.startTimestamp.toNumber() * 1000), 'PPP')} <Text d="inline" fontSize="xs" opacity={0.8}>{format(new Date(event.cliffTimestamp.toNumber() * 1000), 'M/d/yy')} cliff</Text></Text>
             </Box>
             <Spacer />
-            <Spacer />
             <Box>
               <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8} mb={0.5}>Vesting schedule</Text>
               <Text>{parseInt(ethers.utils.formatUnits(event.vestAmount, 18)).toLocaleString()} SNX every {formatDistance(new Date(0), new Date(event.vestInterval * 1000))}</Text>
