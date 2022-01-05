@@ -1,4 +1,4 @@
-import { atom, selectorFamily } from "recoil";
+import { atom, selector, selectorFamily } from "recoil";
 import { ethers } from 'ethers'
 import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
 import { parseErrorMessage } from '../../lib/utils/helpers'
@@ -15,15 +15,13 @@ export const grantsState = atom({
     default: {},
 });
 
-export const getGrant = selectorFamily({
-    key: 'getGrant',
-    get: (tokenId) => ({ get }) => {
-        return get(grantsState)[tokenId];
+export const getGrants = selector({
+    key: 'getGrants',
+    get: ({ get }) => {
+        return Object.values(get(grantsState))
     },
-    set: (tokenId) => ({ get, set }, newValue) => {
-        let wrappedNewValue = {}
-        wrappedNewValue[tokenId] = newValue
-        set(grantsState, Object.assign({}, get(grantsState), wrappedNewValue))
+    set: () => ({ get, set }, newValue) => {
+        set(grantsState, Object.assign({}, get(grantsState), newValue))
     }
 });
 

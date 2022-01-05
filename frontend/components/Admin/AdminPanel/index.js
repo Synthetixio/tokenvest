@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useWallet } from 'use-wallet'
-import { Spinner } from '@chakra-ui/react'
+import { Text, Link, Spinner } from '@chakra-ui/react'
+import { InfoOutlineIcon } from '@chakra-ui/icons'
 import Grants from './Grants'
 import TokenBalance from './TokenBalance'
 import RecentActivity from '../../shared/RecentActivity'
@@ -25,6 +26,14 @@ export default function AdminPanel() {
     <Grants />
     <TokenBalance />
     <RecentActivity />
+    <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Actions are queued to a Gnosis Safe at <Link
+      d="inline"
+      borderBottom="1px rgba(255,255,255,0.66) dotted"
+      borderRadius={1}
+      _hover={{
+        textDecoration: "none",
+        borderBottom: "1px rgba(255,255,255,0.9) dotted",
+      }} href={`https://etherscan.io/address/${process.env.NEXT_PUBLIC_MULTISIG_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_MULTISIG_ADDRESS}</Link></Text>
   </>
 
 

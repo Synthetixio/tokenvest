@@ -21,7 +21,7 @@ export default function RecentActivity({ tokenId }) {
         return (<Box borderBottom={ind + 1 != events.length && "1px solid rgba(0,0,0,0.33)"} py={4} key={ind}>
           <Flex w="100%" mb={3} alignItems="baseline">
             <Heading d="inline" size="md" fontWeight="medium" mr={3}>
-              {event.type == "Grant Update" && ind == events.length - 1 ? "Grant Issuance" : event.type}
+              {event.type == "Grant Update" && ind == events.length - 1 && tokenId != undefined ? "Grant Issuance" : event.type}
             </Heading>
             {tokenId == undefined &&
               <Text

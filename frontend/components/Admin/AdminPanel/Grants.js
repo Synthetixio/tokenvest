@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Heading, Box, Spinner, Table, Thead, Tbody, Tr, Th, Td, Link, Button, Flex } from '@chakra-ui/react'
+import { Heading, Box, Table, Thead, Tbody, Tr, Th, Td, Link, Button, Flex } from '@chakra-ui/react'
 import { Icon, EditIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
 import { format } from 'date-fns'
 import { BsAward } from 'react-icons/bs'
 import { accountDisplay } from '../../../lib/utils/helpers'
+import { useRecoilState } from 'recoil'
+import { getGrants } from '../../../lib/store/grants'
 
 export default function Grants() {
 
-  const grants = []
+  const [grants, setGrants] = useRecoilState(getGrants);
 
   return (
     <Box
@@ -35,6 +37,7 @@ export default function Grants() {
         </Thead>
         <Tbody>
           {grants.map(grant => {
+            /*
             return (
               <Tr>
                 <Td><Link
@@ -57,6 +60,7 @@ export default function Grants() {
                 <Td><EditIcon /></Td>
               </Tr>
             )
+            */
           })}
         </Tbody>
       </Table>
