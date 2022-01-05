@@ -62,7 +62,7 @@ export default function Grants() {
                   <Text fontSize="xs" opacity={0.8}>of {parseInt(ethers.utils.formatUnits(grant.totalAmount, 18)).toLocaleString()} SNX total</Text>
                 </Td>
                 <Td>
-                  <GrantModal tokenId={grant.tokenId} />
+                  <GrantModal grant={grant} />
                   <BurnButton tokenId={grant.tokenId} />
                 </Td>
               </Tr>
