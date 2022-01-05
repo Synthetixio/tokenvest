@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Heading, Box, Text, Spinner, Table, Thead, Tbody, Tr, Th, Td, Button, useToast } from '@chakra-ui/react'
+import { Heading, Box, Text, Spinner, Table, Thead, Tbody, Tr, Th, Td, Button, useToast, Link } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { BsCashStack } from 'react-icons/bs'
 import { ethers } from 'ethers'
@@ -95,7 +95,7 @@ export default function TokenBalance() {
       {loadingData ?
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :
         (tokenData && tokenData.length ?
-          <Table size="sm" variant='simple' mt={3}>
+          <Table size="sm" variant='simple' my={3}>
             <Thead>
               <Tr>
                 <Th>Token</Th>
@@ -121,8 +121,16 @@ export default function TokenBalance() {
               })}
             </Tbody>
           </Table>
-          : <Text mt={5} mb={3} textAlign="center" opacity={0.8}>No tokens balances found</Text>)
+          : <Text mt={14} mb={12} textAlign="center" opacity={0.8}>No tokens balances found</Text>)
       }
+      <Text fontSize="xs" textAlign="center" opacity={0.8}>Token balances provided by <Link
+        d="inline"
+        borderBottom="1px rgba(255,255,255,0.66) dotted"
+        borderRadius={1}
+        _hover={{
+          textDecoration: "none",
+          borderBottom: "1px rgba(255,255,255,0.9) dotted",
+        }} href={`https://ethplorer.io/address/${contractAddress}`} isExternal>ethplorer</Link></Text>
     </Box >
   )
 }
