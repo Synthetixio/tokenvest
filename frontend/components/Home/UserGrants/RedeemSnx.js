@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heading, Input, Button, FormControl, FormHelperText, Flex, Box, FormLabel, Text, Spinner } from '@chakra-ui/react'
+import { Heading, Input, Button, FormControl, FormHelperText, Flex, Box, FormLabel, Text, Checkbox, Grid } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { BsCash } from 'react-icons/bs'
 import { ethers } from 'ethers'
@@ -11,6 +11,9 @@ export default function ReedemSnx({ tokenId }) {
   const [grant, setGrant] = useRecoilState(getGrant(tokenId));
   const [events, setEvents] = useRecoilState(getEventsByTokenId(tokenId));
 
+  const [exchangeMode, setExchangeMode] = useState(false);
+  const [exchangeTokenAmount, setExchangeTokenAmount] = useState(0);
+  const [exchangeTokenAddress, setExchangeTokenAddress] = useState("");
   const [loadingRedemption, setLoadingRedemption] = useState(false);
 
   const vested = parseFloat(ethers.utils.formatUnits(grant.amountVested, 18))
@@ -19,7 +22,7 @@ export default function ReedemSnx({ tokenId }) {
 
   const redeem = () => {
     setLoadingRedemption(true)
-    redeemGrant(grant.tokenId, setGrant, setEvents)
+    redeemGrant(grant.tokenId, exchangeMode && exchangeTokenAmount, exchangeMode && exchangeTokenAddress, setGrant, setEvents)
       .finally(() => {
         setLoadingRedemption(false)
       })
@@ -62,10 +65,17 @@ export default function ReedemSnx({ tokenId }) {
         </Box>
       </Flex>
 
-      <FormControl d="none" mb={4}>
+      <Checkbox mb={4} checked={exchangeMode} onChange={(e) => setExchangeMode(e.target.checked)}>I would like to exchange tokens when redeeming SNX.</Checkbox>
+
+      <FormControl d={!exchangeMode && "none"} mb={6}>
         <FormLabel>Optional Purchase Price</FormLabel>
-        <Input placeholder='Enter Amount' />
-        <FormHelperText>For tax reasons, you may purchase these tokens rather than receive them at no cost. Consult your own tax council.</FormHelperText>
+
+        <Grid templateColumns='repeat(2, 1fr)' gap={6}>
+          <Input type="number" value={exchangeTokenAmount} onChange={(e) => setExchangeTokenAmount(e.target.value)} placeholder='Enter Amount' />
+          <Input value={exchangeTokenAddress} onChange={(e) => setExchangeTokenAddress(e.target.value)} placeholder='Enter Token Address' />
+        </Grid>
+
+        <FormHelperText>For tax reasons, you may elected to purchase these tokens rather than receive them like income. Consult a tax professional for more information.</FormHelperText>
       </FormControl>
 
       <Button onClick={redeem} isLoading={loadingRedemption} isFullWidth size="lg" isDisabled={available == 0} colorScheme="blue">Redeem {available.toLocaleString()} SNX</Button>

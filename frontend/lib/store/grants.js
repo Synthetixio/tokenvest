@@ -1,6 +1,7 @@
-import { atom, selector, selectorFamily } from "recoil";
+import { atom, selectorFamily } from "recoil";
 import { ethers } from 'ethers'
 import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
+import erc20Abi from '../../../artifacts/contracts/test-helpers/SampleToken.sol/SampleToken.json'
 import { parseErrorMessage } from '../../lib/utils/helpers'
 import { createStandaloneToast } from '@chakra-ui/react'
 import theme from '../../styles/theme'
@@ -89,7 +90,7 @@ export const fetchGrants = async (setGrant) => {
     return Promise.all(promises)
 }
 
-export const redeemGrant = async (tokenId, setGrant, setEvents) => {
+export const redeemGrant = async (tokenId, exchangeTokenAmount, exchangeTokenAddress, setGrant, setEvents) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum) //or should this be passed in?
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
@@ -132,7 +133,19 @@ export const redeemGrant = async (tokenId, setGrant, setEvents) => {
         })
     })
 
-    return await vesterContract.connect(provider.getSigner()).redeem(tokenId)
-        .then(submitToastEvent)
-        .catch(errorToastEvent)
+    if (exchangeTokenAmount) {
+        const exchangeTokenAmountParsed = ethers.utils.parseEther(exchangeTokenAmount.toString())
+        const exchangeTokenAddressParsed = ethers.utils.getAddress(exchangeTokenAddress)
+
+        const erc20Contract = new ethers.Contract(exchangeTokenAddressParsed, erc20Abi.abi, provider); // should be provider.getSigner() ?
+        return await erc20Contract.connect(provider.getSigner()).approve(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, exchangeTokenAmountParsed).then(async () => {
+            return await vesterContract.connect(provider.getSigner()).redeemWithTransfer(tokenId, exchangeTokenAddressParsed, exchangeTokenAmountParsed)
+                .then(submitToastEvent)
+                .catch(errorToastEvent)
+        })
+    } else {
+        return await vesterContract.connect(provider.getSigner()).redeem(tokenId)
+            .then(submitToastEvent)
+            .catch(errorToastEvent)
+    }
 }
