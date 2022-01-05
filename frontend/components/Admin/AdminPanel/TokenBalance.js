@@ -68,14 +68,14 @@ export default function TokenBalance() {
         title: "Transaction Queued",
         description: submitResult.transactions.length
           ? `You’ve successfully queued the withdrawal transaction in the Gnosis Safe.`
-          : "New transactions weren’t added. It is likely already awaiting execution in the Gnosis Safe.",
+          : "A transaction wasn’t added. It is likely already awaiting execution in the Gnosis Safe.",
         status: "success",
         isClosable: true,
       });
     } catch {
       toast({
         title: "Error",
-        description: `Something went wrong when attempting to queue these transactions.`,
+        description: `Something went wrong when attempting to queue this transaction.`,
         status: "error",
         isClosable: true,
       });
