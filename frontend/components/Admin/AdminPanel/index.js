@@ -6,13 +6,13 @@ import Grants from './Grants'
 import TokenBalance from './TokenBalance'
 import RecentActivity from '../../shared/RecentActivity'
 import { useRecoilState } from 'recoil'
-import { grantsState, fetchGrants } from '../../../lib/store/grants'
+import { getGrants, fetchGrants } from '../../../lib/store/grants'
 import { eventsState, fetchEvents } from '../../../lib/store/events'
 
 export default function AdminPanel() {
   const wallet = useWallet()
 
-  const [grants, setGrant] = useRecoilState(grantsState);
+  const [grants, setGrant] = useRecoilState(getGrants());
   const [events, setEvents] = useRecoilState(eventsState);
   const [loadingData, setLoadingData] = useState(true);
 

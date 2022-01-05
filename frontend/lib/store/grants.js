@@ -15,13 +15,27 @@ export const grantsState = atom({
     default: {},
 });
 
-export const getGrants = selector({
+export const getGrants = selectorFamily({
     key: 'getGrants',
-    get: ({ get }) => {
+    get: (address) => ({ get }) => {
         return Object.values(get(grantsState))
     },
     set: () => ({ get, set }, newValue) => {
-        set(grantsState, Object.assign({}, get(grantsState), newValue))
+        let wrappedNewValue = {}
+        wrappedNewValue[newValue.tokenId] = newValue
+        set(grantsState, Object.assign({}, get(grantsState), wrappedNewValue))
+    }
+});
+
+export const getGrant = selectorFamily({
+    key: 'getGrant',
+    get: (tokenId) => ({ get }) => {
+        return get(grantsState)[tokenId];
+    },
+    set: (tokenId) => ({ get, set }, newValue) => {
+        let wrappedNewValue = {}
+        wrappedNewValue[tokenId] = newValue
+        set(grantsState, Object.assign({}, get(grantsState), wrappedNewValue))
     }
 });
 
@@ -40,7 +54,6 @@ export const getGrantsByUser = selectorFamily({
 
 /**** ACTIONS ****/
 
-// rename to fetch?
 export const fetchGrant = async (setGrant, tokenId) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
