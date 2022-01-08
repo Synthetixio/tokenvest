@@ -1,6 +1,6 @@
 import { Heading, Flex, Box, Text, Link, Spacer } from '@chakra-ui/react'
 import { Icon, TimeIcon } from '@chakra-ui/icons'
-import { BsCalendarWeek } from 'react-icons/bs'
+import { BsCalendarWeek, BsAward, BsSquare } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import { format, formatDistanceToNow, formatDistance } from 'date-fns'
 import { useRecoilState } from 'recoil'
@@ -19,31 +19,34 @@ export default function RecentActivity({ tokenId }) {
       <Heading size="lg" fontWeight="light"><Icon as={BsCalendarWeek} boxSize={5} mr={2} />Recent Activity</Heading>
       {events.length ? events.slice().sort((a, b) => (b.blockNumber - a.blockNumber)).map((event, ind) => {
         return (<Box borderBottom={ind + 1 != events.length && "1px solid rgba(0,0,0,0.33)"} py={4} key={ind}>
-          <Flex w="100%" mb={3} alignItems="baseline">
-            <Heading d="inline" size="md" fontWeight="medium" mr={3}>
+          <Flex w="100%" mb={3}>
+            <Heading d="inline" size="md" fontWeight="medium">
               {event.type == "Grant Update" && ind == events.length - 1 && tokenId != undefined ? "Grant Issuance" : event.type}
             </Heading>
-            {tokenId == undefined &&
-              <Text
-                d="inline"
-                mr={3}
-                fontSize="sm"
-                transform="translateY(-1px)"
-                borderRadius={1}
-                lineHeight={1.2}>Grant #{event.tokenId.toNumber()}</Text>
-            }
-            <Link
-              d="inline"
-              fontSize="sm"
-              transform="translateY(-1px)"
-              borderBottom="1px rgba(255,255,255,0.66) dotted"
-              borderRadius={1}
-              lineHeight={1.2}
-              _hover={{
-                textDecoration: "none",
-                borderBottom: "1px rgba(255,255,255,0.9) dotted",
-              }} href={`https://etherscan.io/tx/${event.transactionHash}#eventlog`} isExternal>Block {event.blockNumber.toLocaleString()}</Link>
-            <Text transform="translateY(-2px)" ml="auto" d="inline-block" fontSize="xs"><TimeIcon transform="translateY(-1px)" mr={0.5} /> {formatDistanceToNow(new Date(event.timestamp * 1000))} ago</Text>
+            <Box ml="auto">
+              {tokenId == undefined &&
+                <Text
+                  d="inline-block"
+                  mr={4}
+                  fontSize="xs"
+                  borderRadius={1}
+                  lineHeight={1.2}><Icon as={BsAward} mr={0.5} transform="translateY(1px)" /> Grant #{event.tokenId.toNumber()}</Text>
+              }
+              <Box
+                d="inline-block"
+                mr={4}
+                fontSize="xs">
+                <Icon as={BsSquare} mr={0.5} transform="translateY(1.5px)" />&nbsp;
+                <Link
+                  borderBottom="1px rgba(255,255,255,0.66) dotted"
+                  borderRadius={1}
+                  _hover={{
+                    textDecoration: "none",
+                    borderBottom: "1px rgba(255,255,255,0.9) dotted",
+                  }} href={`https://etherscan.io/tx/${event.transactionHash}#eventlog`} isExternal>Block {event.blockNumber.toLocaleString()}</Link>
+              </Box>
+              <Text d="inline-block" fontSize="xs"><TimeIcon transform="translateY(-1px)" mr={0.5} /> {formatDistanceToNow(new Date(event.timestamp * 1000))} ago</Text>
+            </Box>
           </Flex>
 
           {event.type == "Redemption" && <Text fontSize="lg" mt={-1.5}>{parseFloat(ethers.utils.formatUnits(event.amount, 18)).toLocaleString()} SNX redeemed by {event.redeemerAddress}.</Text>}
