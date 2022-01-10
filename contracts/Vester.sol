@@ -29,7 +29,7 @@ contract Vester is ERC721Enumerable {
         tokenAddress = _tokenAddress;
     }
 
-    /// @notice Redeem all available vested tokens for the calling address
+    /// @notice Redeem all available vested tokens
     function redeem(uint tokenId) public {
         require(ownerOf(tokenId) == msg.sender, "You don't own this grant.");
 
@@ -45,7 +45,7 @@ contract Vester is ERC721Enumerable {
         emit Redemption(tokenId, msg.sender, amount);
     }
 
-    /// @notice Redeem all available vested tokens for the calling address and transfer in arbitrary tokens (to make this an exchange rather than income)
+    /// @notice Redeem all available vested tokens and transfer in arbitrary tokens (to make this an exchange rather than income)
     /// @param incomingTokenAddress The address of the token being transferred in
     /// @param incomingTokenAmount The amount of the token being transferred in
     function redeemWithTransfer(uint tokenId, address incomingTokenAddress, uint incomingTokenAmount) external {
