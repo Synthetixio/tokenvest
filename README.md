@@ -24,7 +24,7 @@ Holders of the NFT are able to redeem available tokens using the `redeem()` or `
 
 ## Technical Specification
 
-This an ERC-721 contract that implements the enumerable extension. Each NFT corresponds to a grant and allows its owner to redeem ERC-20 tokens from the contract according to a specified vesting scheduling.
+This an ERC-721 contract that implements the enumerable extension. Each NFT corresponds to a grant and allows the grantee to redeem ERC-20 tokens from the contract according to a specified vesting scheduling.
 
 ### Owner
 
@@ -38,10 +38,10 @@ This an ERC-721 contract that implements the enumerable extension. Each NFT corr
 
 ### Grantee
 
-* The owner of a grant (and only the owner of that grant) should be able to redeem tokens from the contract according to the vesting schedule associated with the NFTs they hold.
+* The grantee (and only the grantee) should be able to redeem tokens from the contract according to the vesting schedule associated with the NFTs they hold.
     - Starting at the `startTimestamp`, each `vestInterval` should vest `vestAmount` of tokens.
     - No tokens should vest prior to the `cliffTimestamp`, but this should not be taken into account when calculating the amount vested after the cliff has passed. For example, given a `vestAmount` of 100, a `vestInterval` of 3 months, and a `cliffTimestamp` of +6 months, 0 tokens should be vested at +5 months, 200 tokens should be vested at +6 months, and 300 tokens should be vested at +9 months.
     - Under no circumstances should a grant provide access to more than the `totalAmount` of tokens.
     - Users are able to redeem the amount of vested tokens minus the amount of tokens they've already redeemed.
-* The owner of a grant (and only the owner of that grant) should be able to redeem tokens (as specified above) and also transfer any amount of any ERC-20 token to this contract in a single transaction using the `redeemWithTransfer()` function.
-* The owner of a grant should be able to transfer that grant to another address using the standard functions in the ERC-721 specification.
+* The grantee (and only the grantee) should be able to redeem tokens (as specified above) and also transfer any amount of any ERC-20 token to this contract in a single transaction using the `redeemWithTransfer()` function.
+* The grantee should be able to transfer that grant to another address using the standard functions in the ERC-721 specification.
