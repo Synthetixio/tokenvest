@@ -4,7 +4,7 @@ async function main() {
   await hre.run('compile');
 
   const Vester = await hre.ethers.getContractFactory("Vester");
-  const vester = await Vester.deploy("0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F");
+  const vester = await Vester.deploy("SNX Grant", "gSNX", "0xee8C74634fc1590Ab7510a655F53159524ed0aC5", "0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c");
 
   await vester.deployed();
 
