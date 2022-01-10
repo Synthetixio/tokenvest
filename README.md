@@ -10,7 +10,9 @@ Each grant is represented as an NFT. It has the following properties:
 * `totalAmount` - The total amount of tokens that will vest for this grant.
 * `amountRedeemed` - The amount of tokens already redeemed under this grant.
 
-The contract owner is able to mint, update, and burn the NFTs. The dApp assumes this will be a multisig wallet on Gnosis Safe. Holders of the NFT are able to redeem available tokens using the `redeem()` or `redeemWithTransfer()` methods.
+The contract owner is able to manage grants using the `mint()`, `burn()`, and `updateGrant()` functions. The owner can also withdraw tokens using the `withdraw()` function. The dApp assumes this will be a multisig wallet on Gnosis Safe. Ownership can be transferred using the `nominateOwner()` and `acceptOwnership()` functions.
+
+Holders of the NFT are able to redeem available tokens using the `redeem()` or `redeemWithTransfer()` methods.
 
 ## Development Environment
 
