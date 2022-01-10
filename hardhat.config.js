@@ -11,10 +11,6 @@ module.exports = {
   networks: {
     hardhat: {
       chainId: 1337 // see: https://hardhat.org/metamask-issue.html
-    },
-    rinkeby: {
-      url: `https://eth-rinkeby.alchemyapi.io/v2/XXX`,
-      accounts: [``]
     }
   }
 };
