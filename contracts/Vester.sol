@@ -1,13 +1,16 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
 /// @title Vesting Contract
 /// @author Noah Litvin (@noahlitvin)
 /// @notice This contract allows the recipient of a grant to redeem tokens each vesting interval, up to a total amount with an optional cliff.
 contract Vester is ERC721Enumerable {
+
+    using SafeERC20 for IERC20;
 
     struct Grant {
         uint128 vestAmount;
@@ -20,7 +23,7 @@ contract Vester is ERC721Enumerable {
 
     address public owner;
     address public nominatedOwner;
-    address public tokenAddress;
+    address public immutable tokenAddress;
     uint public tokenCounter;
     mapping (uint => Grant) public grants;
 
@@ -40,7 +43,7 @@ contract Vester is ERC721Enumerable {
         require(tokenContract.balanceOf(address(this)) >= amount, "More tokens must be transferred to this contract before you can redeem.");
 
         grants[tokenId].amountRedeemed += amount;
-        tokenContract.transfer(msg.sender, amount);
+        tokenContract.safeTransfer(msg.sender, amount);
 
         emit Redemption(tokenId, msg.sender, amount);
     }
@@ -50,10 +53,7 @@ contract Vester is ERC721Enumerable {
     /// @param incomingTokenAmount The amount of the token being transferred in
     function redeemWithTransfer(uint tokenId, address incomingTokenAddress, uint incomingTokenAmount) external {
         IERC20 incomingTokenContract = IERC20(incomingTokenAddress);
-        require(
-            incomingTokenContract.transferFrom(msg.sender, address(this), incomingTokenAmount),
-            "Incoming tokens failed to transfer."
-        );
+        incomingTokenContract.safeTransferFrom(msg.sender, address(this), incomingTokenAmount);
         redeem(tokenId);
     }
 
@@ -69,17 +69,19 @@ contract Vester is ERC721Enumerable {
     /// @param tokenId The ID of the grant
     /// @return The amount of vested tokens, denominated in tokens * 10^18
     function amountVested(uint tokenId) public view returns (uint128) {
+        Grant storage grant = grants[tokenId];
+
         // Nothing has vested until the cliff has past.
-        if(block.timestamp < grants[tokenId].cliffTimestamp){
+        if(block.timestamp < grant.cliffTimestamp){
             return 0;
         }
 
         // Calculate the number of intervals elapsed (will round down) multiplied by the amount to vest per vesting interval.
-        uint128 amount = ((uint128(block.timestamp) - grants[tokenId].startTimestamp) / grants[tokenId].vestInterval) * grants[tokenId].vestAmount;
+        uint128 amount = ((uint128(block.timestamp) - grant.startTimestamp) / grant.vestInterval) * grant.vestAmount;
 
         // The total amount vested cannot exceed total grant size.
-        if(amount > grants[tokenId].totalAmount){
-            return grants[tokenId].totalAmount;
+        if(amount > grant.totalAmount){
+            return grant.totalAmount;
         }
 
         return amount;
@@ -90,7 +92,7 @@ contract Vester is ERC721Enumerable {
     /// @param withdrawalTokenAddress The address of the ERC20 token to redeem
     function withdraw(address withdrawalTokenAddress, uint withdrawalTokenAmount) public onlyOwner {
         IERC20 tokenContract = IERC20(withdrawalTokenAddress);
-        tokenContract.transfer(msg.sender, withdrawalTokenAmount);
+        tokenContract.safeTransfer(msg.sender, withdrawalTokenAmount);
 
         emit Withdrawal(msg.sender, withdrawalTokenAddress, withdrawalTokenAmount);
     }
@@ -125,9 +127,9 @@ contract Vester is ERC721Enumerable {
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
     function mint(address granteeAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) external onlyOwner {
-        _safeMint(granteeAddress, tokenCounter);
         updateGrant(tokenCounter, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
         tokenCounter++;
+        _safeMint(granteeAddress, tokenCounter-1);
     }
 
     /// @notice Destroy a grant
