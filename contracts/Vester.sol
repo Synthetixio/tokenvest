@@ -53,11 +53,11 @@ contract Vester is ERC721Enumerable {
     /// @param incomingTokenAmount The amount of the token being transferred in
     function redeemWithTransfer(uint tokenId, address incomingTokenAddress, uint incomingTokenAmount) external {
         IERC20 incomingTokenContract = IERC20(incomingTokenAddress);
-        incomingTokenContract.safeTransferFrom(msg.sender, address(this), incomingTokenAmount);
         redeem(tokenId);
+        incomingTokenContract.safeTransferFrom(msg.sender, address(this), incomingTokenAmount);
     }
 
-    /// @notice Calculate the amount of tokens currently available for redemption for a given grantee
+    /// @notice Calculate the amount of tokens currently available for redemption for a given grant
     /// @dev This subtracts the amount of previously redeemed token from the total amount that has vested.
     /// @param tokenId The ID of the grant
     /// @return The amount available for redemption, denominated in tokens * 10^18
@@ -137,6 +137,7 @@ contract Vester is ERC721Enumerable {
     /// @param tokenId The ID of the grant
     function burn(uint tokenId) external onlyOwner {
         _burn(tokenId);
+        delete grants[tokenId];
     }
 
     /// @notice Nominate a new owner
