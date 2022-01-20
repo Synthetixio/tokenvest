@@ -161,7 +161,7 @@ export default function GrantModal({ grant }) {
             <FormLabel htmlFor='vestAmount'>Vesting Amount</FormLabel>
             <InputGroup>
               <Input value={vestAmount} onChange={(e) => setVestAmount(e.target.value)} type="number" id='vestAmount' />
-              <InputRightAddon children='SNX' />
+              <InputRightAddon>SNX</InputRightAddon>
             </InputGroup>
             <FormHelperText>This is the amount of tokens that are made available to the grantee each vesting interval.</FormHelperText>
           </FormControl>
@@ -170,7 +170,7 @@ export default function GrantModal({ grant }) {
             <FormLabel htmlFor='amountRedeemed'>Amount Redeemed</FormLabel>
             <InputGroup>
               <Input value={amountRedeemed} onChange={(e) => setAmountRedeemed(e.target.value)} type="number" id='amountRedeemed' />
-              <InputRightAddon children='SNX' />
+              <InputRightAddon>SNX</InputRightAddon>
             </InputGroup>
             <FormHelperText>This is the amount of tokens that have already been redeemed from this grant.</FormHelperText>
           </FormControl>
@@ -179,7 +179,7 @@ export default function GrantModal({ grant }) {
             <FormLabel htmlFor='totalAmount'>Total Grant Amount</FormLabel>
             <InputGroup>
               <Input value={totalAmount} onChange={(e) => setTotalAmount(e.target.value)} type="number" id='totalAmount' />
-              <InputRightAddon children='SNX' />
+              <InputRightAddon>SNX</InputRightAddon>
             </InputGroup>
             <FormHelperText>This is total amount of tokens awarded over the lifetime of this grant.</FormHelperText>
           </FormControl>

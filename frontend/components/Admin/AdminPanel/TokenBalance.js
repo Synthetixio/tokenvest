@@ -106,7 +106,7 @@ export default function TokenBalance() {
             <Tbody>
               {tokenData.map(token => {
                 return (
-                  <Tr>
+                  <Tr key={token.tokenInfo.symbol}>
                     <Td>
                       {token.tokenInfo.name}
                     </Td>
