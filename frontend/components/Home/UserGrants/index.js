@@ -22,21 +22,23 @@ export default function UserGrants() {
     })
   }, [])
 
-  return loadingData ? <Spinner d="block" mx="auto" my={6} /> : grants.map((grant, ind) => {
-    return (<Box key={ind} mb={12}>
-      <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId.toNumber()}</Text>
-      <GrantStatus tokenId={grant.tokenId.toNumber()} />
-      <RedeemSnx tokenId={grant.tokenId.toNumber()} />
-      <RecentActivity tokenId={grant.tokenId.toNumber()} />
-      <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Each grant is an NFT at the contract address <Link
-        d="inline"
-        borderBottom="1px rgba(255,255,255,0.66) dotted"
-        borderRadius={1}
-        _hover={{
-          textDecoration: "none",
-          borderBottom: "1px rgba(255,255,255,0.9) dotted",
-        }} href={`https://etherscan.io/token/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</Link></Text>
-    </Box>)
-  })
+  return loadingData ? <Spinner d="block" mx="auto" my={6} /> :
+
+    (grants.length ? grants.map((grant, ind) => {
+      return (<Box key={ind} mb={12}>
+        <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId.toNumber()}</Text>
+        <GrantStatus tokenId={grant.tokenId.toNumber()} />
+        <RedeemSnx tokenId={grant.tokenId.toNumber()} />
+        <RecentActivity tokenId={grant.tokenId.toNumber()} />
+        <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Each grant is an NFT at the contract address <Link
+          d="inline"
+          borderBottom="1px rgba(255,255,255,0.66) dotted"
+          borderRadius={1}
+          _hover={{
+            textDecoration: "none",
+            borderBottom: "1px rgba(255,255,255,0.9) dotted",
+          }} href={`https://etherscan.io/token/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</Link></Text>
+      </Box>)
+    }) : <Text textAlign="center" py={16} fontWeight="thin" fontSize="3xl" letterSpacing={1.5}>There are no grants associated with this wallet.</Text>)
 
 }
