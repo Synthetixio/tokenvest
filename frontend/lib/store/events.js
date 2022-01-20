@@ -1,6 +1,6 @@
 import { atom, selector, selectorFamily } from "recoil";
 import { ethers } from 'ethers'
-import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
+import vesterAbi from '../../abis/Vester.json'
 
 /**** STATE ****/
 

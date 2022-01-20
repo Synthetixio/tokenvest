@@ -1,7 +1,7 @@
 import { atom, selectorFamily } from "recoil";
 import { ethers } from 'ethers'
-import vesterAbi from '../../../artifacts/contracts/Vester.sol/Vester.json'
-import erc20Abi from '../../../artifacts/contracts/test-helpers/SampleToken.sol/SampleToken.json'
+import vesterAbi from '../../abis/Vester.json'
+import erc20Abi from '../../abis/SampleToken.json'
 import { parseErrorMessage } from '../../lib/utils/helpers'
 import { createStandaloneToast } from '@chakra-ui/react'
 import theme from '../../styles/theme'
