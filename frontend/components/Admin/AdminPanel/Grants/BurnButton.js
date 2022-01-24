@@ -61,5 +61,5 @@ export default function BurnButton({ tokenId }) {
     }
   }
 
-  return (<DeleteIcon onClick={() => queueBurn()} boxSize={4} />)
+  return (<DeleteIcon onClick={() => queueBurn()} cursor="pointer" boxSize={4} />)
 }

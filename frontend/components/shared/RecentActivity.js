@@ -21,7 +21,7 @@ export default function RecentActivity({ tokenId }) {
         return (<Box borderBottom={ind + 1 != events.length && "1px solid rgba(0,0,0,0.33)"} py={4} key={ind}>
           <Flex w="100%" mb={3}>
             <Heading d="inline" size="md" fontWeight="medium">
-              {event.type == "Grant Update" && ind == events.length - 1 && tokenId != undefined ? "Grant Issuance" : event.type}
+              {event.type}
             </Heading>
             <Box ml="auto">
               {tokenId == undefined &&
@@ -49,7 +49,7 @@ export default function RecentActivity({ tokenId }) {
             </Box>
           </Flex>
 
-          {event.type == "Redemption" && <Text fontSize="lg" mt={-1.5}>{parseFloat(ethers.utils.formatUnits(event.amount, 18)).toLocaleString()} SNX redeemed by {event.redeemerAddress}.</Text>}
+          {event.type == "Redemption" && <Text fontSize="lg" mt={-1.5}>{parseFloat(ethers.utils.formatUnits(event.amount, 18)).toLocaleString()} {event.tokenSymbol} redeemed by {event.redeemerAddress}.</Text>}
           {event.type == "Grant Update" && <Flex>
             <Box>
               <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8} mb={0.5}>Start Date</Text>
@@ -58,12 +58,12 @@ export default function RecentActivity({ tokenId }) {
             <Spacer />
             <Box>
               <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8} mb={0.5}>Vesting schedule</Text>
-              <Text>{parseInt(ethers.utils.formatUnits(event.vestAmount, 18)).toLocaleString()} SNX every {formatDistance(new Date(0), new Date(event.vestInterval * 1000))}</Text>
+              <Text>{parseInt(ethers.utils.formatUnits(event.vestAmount, 18)).toLocaleString()} {event.tokenSymbol} every {formatDistance(new Date(0), new Date(event.vestInterval * 1000))}</Text>
             </Box>
             <Spacer />
             <Box>
               <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8} mb={0.5}>Amount Redeemed</Text>
-              <Text>{parseInt(ethers.utils.formatUnits(event.amountRedeemed, 18)).toLocaleString()} SNX of {parseInt(ethers.utils.formatUnits(event.totalAmount, 18)).toLocaleString()} SNX</Text>
+              <Text>{parseInt(ethers.utils.formatUnits(event.amountRedeemed, 18)).toLocaleString()} {event.tokenSymbol} of {parseInt(ethers.utils.formatUnits(event.totalAmount, 18)).toLocaleString()} {event.tokenSymbol}</Text>
             </Box>
           </Flex>}
 

@@ -5,6 +5,7 @@
 This is a smart contract and dApp that manages token grants with vesting schedules.
 
 Each grant is represented as an NFT. It has the following properties:
+* `tokenAddress` - The address of the tokens being provided by the grant.
 * `startTimestamp` - The timestamp (in seconds) when the grant begins to vest. 
 * `cliffTimestamp` - The timestamp (in seconds) before which no tokens can be redeemed.
 * `vestInterval` - The duration (in seconds) for each additional amount to vest.

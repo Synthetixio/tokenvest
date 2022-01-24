@@ -12,9 +12,7 @@ import {
   FormControl,
   FormLabel,
   FormHelperText,
-  Input,
-  InputGroup,
-  InputRightAddon
+  Input
 } from '@chakra-ui/react'
 import { EditIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
@@ -27,15 +25,17 @@ export default function GrantModal({ grant }) {
   const contractAddress = process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS
 
   const [granteeAddress, setGranteeAddress] = useState('')
-  const [startTimestamp, setStartTimestamp] = useState('')
-  const [cliffTimestamp, setCliffTimestamp] = useState('')
-  const [vestAmount, setVestAmount] = useState('')
-  const [totalAmount, setTotalAmount] = useState('')
-  const [amountRedeemed, setAmountRedeemed] = useState('')
-  const [vestInterval, setVestInterval] = useState('')
+  const [tokenAddress, setTokenAddress] = useState('')
+  const [startTimestamp, setStartTimestamp] = useState('0')
+  const [cliffTimestamp, setCliffTimestamp] = useState('0')
+  const [vestAmount, setVestAmount] = useState('0')
+  const [totalAmount, setTotalAmount] = useState('0')
+  const [amountRedeemed, setAmountRedeemed] = useState('0')
+  const [vestInterval, setVestInterval] = useState('0')
 
   const openHandler = () => {
     if (grant) {
+      setTokenAddress(grant.tokenAddress)
       setStartTimestamp(grant.startTimestamp)
       setCliffTimestamp(grant.cliffTimestamp)
       setVestAmount(parseFloat(ethers.utils.formatUnits(grant.vestAmount, 18)))
@@ -61,15 +61,31 @@ export default function GrantModal({ grant }) {
   }
 
   const queueTransaction = async () => {
-    const safeBatchSubmitter = await generateSafeBatchSubmitter();
+
+    let checksummedTokenAddress, checksummedGranteeAddress;
+    try {
+      checksummedTokenAddress = ethers.utils.getAddress(tokenAddress)
+      if (!grant) {
+        checksummedGranteeAddress = ethers.utils.getAddress(granteeAddress)
+      }
+    } catch {
+      toast({
+        title: "Couldn’t Queue Transaction",
+        description: `Make sure any addresses are valid.`,
+        status: "error",
+        isClosable: true,
+      });
+      return
+    }
 
     const vesterInterface = new ethers.utils.Interface([
-      "function updateGrant(uint tokenId, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval)",
-      "function mint(address granteeAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval)",
+      "function updateGrant(uint tokenId, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval)",
+      "function mint(address granteeAddress, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval)",
     ]);
 
     const data = grant ? vesterInterface.encodeFunctionData("updateGrant", [
       grant.tokenId,
+      checksummedTokenAddress,
       startTimestamp,
       cliffTimestamp,
       ethers.utils.parseEther(vestAmount.toString()),
@@ -77,7 +93,8 @@ export default function GrantModal({ grant }) {
       ethers.utils.parseEther(amountRedeemed.toString()),
       vestInterval,
     ]) : vesterInterface.encodeFunctionData("mint", [
-      granteeAddress,
+      checksummedGranteeAddress,
+      checksummedTokenAddress,
       startTimestamp,
       cliffTimestamp,
       ethers.utils.parseEther(vestAmount.toString()),
@@ -86,6 +103,7 @@ export default function GrantModal({ grant }) {
       vestInterval,
     ]);
 
+    const safeBatchSubmitter = await generateSafeBatchSubmitter();
     await safeBatchSubmitter.appendTransaction({
       to: contractAddress,
       data,
@@ -118,7 +136,7 @@ export default function GrantModal({ grant }) {
 
   return (<>
     {grant ?
-      <EditIcon onClick={openHandler} boxSize={4} mr={2} /> :
+      <EditIcon onClick={openHandler} cursor="pointer" boxSize={4} mr={2} /> :
       <Button onClick={openHandler} ml="auto" colorScheme="green" size="sm">Create Grant</Button>
     }
     <Modal size="lg" isOpen={isOpen} onClose={onClose}>
@@ -140,6 +158,12 @@ export default function GrantModal({ grant }) {
           </FormControl>}
 
           <FormControl mb={5}>
+            <FormLabel htmlFor='tokenAddress'>Token Address</FormLabel>
+            <Input value={tokenAddress} onChange={(e) => setTokenAddress(e.target.value)} id='tokenAddress' />
+            <FormHelperText>This is the address of the ERC-20 token being provided by this grant.</FormHelperText>
+          </FormControl>
+
+          <FormControl mb={5}>
             <FormLabel htmlFor='startTimestamp'>Start Timestamp</FormLabel>
             <Input value={startTimestamp} onChange={(e) => setStartTimestamp(e.target.value)} id='startTimestamp' type="number" />
             <FormHelperText>This is the time at which the the grant begins to vest. The current timestamp is {Math.floor(Date.now() / 1000)}.</FormHelperText>
@@ -159,28 +183,19 @@ export default function GrantModal({ grant }) {
 
           <FormControl mb={5}>
             <FormLabel htmlFor='vestAmount'>Vesting Amount</FormLabel>
-            <InputGroup>
-              <Input value={vestAmount} onChange={(e) => setVestAmount(e.target.value)} type="number" id='vestAmount' />
-              <InputRightAddon>SNX</InputRightAddon>
-            </InputGroup>
+            <Input value={vestAmount} onChange={(e) => setVestAmount(e.target.value)} type="number" id='vestAmount' />
             <FormHelperText>This is the amount of tokens that are made available to the grantee each vesting interval.</FormHelperText>
           </FormControl>
 
           <FormControl mb={5}>
             <FormLabel htmlFor='amountRedeemed'>Amount Redeemed</FormLabel>
-            <InputGroup>
-              <Input value={amountRedeemed} onChange={(e) => setAmountRedeemed(e.target.value)} type="number" id='amountRedeemed' />
-              <InputRightAddon>SNX</InputRightAddon>
-            </InputGroup>
+            <Input value={amountRedeemed} onChange={(e) => setAmountRedeemed(e.target.value)} type="number" id='amountRedeemed' />
             <FormHelperText>This is the amount of tokens that have already been redeemed from this grant.</FormHelperText>
           </FormControl>
 
           <FormControl mb={3}>
             <FormLabel htmlFor='totalAmount'>Total Grant Amount</FormLabel>
-            <InputGroup>
-              <Input value={totalAmount} onChange={(e) => setTotalAmount(e.target.value)} type="number" id='totalAmount' />
-              <InputRightAddon>SNX</InputRightAddon>
-            </InputGroup>
+            <Input value={totalAmount} onChange={(e) => setTotalAmount(e.target.value)} type="number" id='totalAmount' />
             <FormHelperText>This is total amount of tokens awarded over the lifetime of this grant.</FormHelperText>
           </FormControl>
 

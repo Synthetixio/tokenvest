@@ -16,7 +16,7 @@ describe("Vester", function () {
     this.tokenContract = await this.TokenContract.deploy();
     await this.tokenContract.deployed();
 
-    this.vester = await this.VesterContract.deploy("Token Grant", "TKG", owner.address, this.tokenContract.address);
+    this.vester = await this.VesterContract.deploy("Token Grant", "TKG", owner.address);
     await this.vester.deployed();
   });
 
@@ -40,8 +40,8 @@ describe("Vester", function () {
     const [owner, user] = await ethers.getSigners();
 
     await expect(this.vester.connect(user).withdraw(ZERO_ADDRESS, 1)).to.be.revertedWith('Only the owner can call this function.');
-    await expect(this.vester.connect(user).updateGrant(1, 1, 1, 1, 1, 1, 1)).to.be.revertedWith('Only the owner can call this function.');
-    await expect(this.vester.connect(user).mint(ZERO_ADDRESS, 1, 1, 1, 1, 1, 1)).to.be.revertedWith('Only the owner can call this function.');
+    await expect(this.vester.connect(user).updateGrant(1, this.tokenContract.address, 1, 1, 1, 1, 1, 1)).to.be.revertedWith('Only the owner can call this function.');
+    await expect(this.vester.connect(user).mint(ZERO_ADDRESS, this.tokenContract.address, 1, 1, 1, 1, 1, 1)).to.be.revertedWith('Only the owner can call this function.');
     await expect(this.vester.connect(user).burn(1)).to.be.revertedWith('Only the owner can call this function.');
     await expect(this.vester.connect(user).nominateOwner(ZERO_ADDRESS)).to.be.revertedWith('Only the owner can call this function.');
   });
@@ -51,9 +51,10 @@ describe("Vester", function () {
     const [owner, grantee] = await ethers.getSigners();
     const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp
 
-    await this.vester.mint(grantee.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
     const grantData = await this.vester.grants(0)
 
+    expect(grantData.tokenAddress).to.equal(this.tokenContract.address)
     expect(grantData.vestAmount).to.equal(ethers.utils.parseEther("2500"))
     expect(grantData.totalAmount).to.equal(ethers.utils.parseEther("30000"))
     expect(grantData.amountRedeemed).to.equal(0)
@@ -66,7 +67,7 @@ describe("Vester", function () {
     const [owner, grantee] = await ethers.getSigners();
     const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp
 
-    await this.vester.mint(grantee.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
     let grantData = await this.vester.grants(0)
     expect(grantData.vestAmount).to.equal(ethers.utils.parseEther("2500"))
     expect(grantData.totalAmount).to.equal(ethers.utils.parseEther("30000"))
@@ -74,6 +75,7 @@ describe("Vester", function () {
 
     await this.vester.connect(owner).updateGrant(
       0,
+      this.tokenContract.address,
       grantData.startTimestamp,
       grantData.cliffTimestamp,
       ethers.utils.parseEther("3000"),
@@ -92,7 +94,7 @@ describe("Vester", function () {
     const [owner, grantee] = await ethers.getSigners();
     const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp
 
-    await this.vester.mint(grantee.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
     let grantData = await this.vester.grants(0)
     expect(grantData.totalAmount).to.equal(ethers.utils.parseEther("30000"))
 
@@ -106,7 +108,7 @@ describe("Vester", function () {
     const [owner, grantee, futureGrantee] = await ethers.getSigners();
     const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp
 
-    await this.vester.mint(grantee.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400);
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400);
 
     expect(await this.vester.balanceOf(grantee.address)).to.equal(1)
     expect(await this.vester.balanceOf(futureGrantee.address)).to.equal(0)
@@ -123,7 +125,7 @@ describe("Vester", function () {
     const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp
 
     await this.tokenContract.mint(this.vester.address, ethers.utils.parseEther("30000"))
-    await this.vester.mint(grantee.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
     await expect(this.vester.connect(grantee).redeem(0)).to.be.reverted;
 
     await network.provider.send("evm_increaseTime", [7889400 * 2])
@@ -143,7 +145,7 @@ describe("Vester", function () {
     await incomingTokenContract.connect(grantee).approve(this.vester.address, ethers.utils.parseEther("1000"))
 
     await this.tokenContract.mint(this.vester.address, ethers.utils.parseEther("30000"))
-    await this.vester.mint(grantee.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
     await expect(this.vester.connect(grantee).redeem(0)).to.be.reverted;
 
     await network.provider.send("evm_increaseTime", [7889400 * 2])
@@ -181,7 +183,7 @@ describe("Vester", function () {
     const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp
 
     await this.tokenContract.mint(this.vester.address, ethers.utils.parseEther("30000"))
-    await this.vester.mint(grantee.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
 
     // The grantee shouldn't able to redeem right away...
     await expect(this.vester.connect(grantee).redeem(0)).to.be.reverted;

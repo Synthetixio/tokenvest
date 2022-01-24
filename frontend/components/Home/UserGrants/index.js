@@ -3,7 +3,7 @@ import { useWallet } from 'use-wallet'
 import { Box, Text, Spinner, Link } from '@chakra-ui/react'
 import { InfoOutlineIcon } from '@chakra-ui/icons'
 import GrantStatus from './GrantStatus'
-import RedeemSnx from './RedeemSnx'
+import RedeemTokens from './RedeemTokens'
 import RecentActivity from '../../shared/RecentActivity'
 import { useRecoilState } from 'recoil'
 import { getGrantsByUser, fetchGrants } from '../../../lib/store/grants'
@@ -23,12 +23,11 @@ export default function UserGrants() {
   }, [])
 
   return loadingData ? <Spinner d="block" mx="auto" my={6} /> :
-
     (grants.length ? grants.map((grant, ind) => {
       return (<Box key={ind} mb={12}>
         <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId.toNumber()}</Text>
         <GrantStatus tokenId={grant.tokenId.toNumber()} />
-        <RedeemSnx tokenId={grant.tokenId.toNumber()} />
+        <RedeemTokens tokenId={grant.tokenId.toNumber()} />
         <RecentActivity tokenId={grant.tokenId.toNumber()} />
         <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Each grant is an NFT at the contract address <Link
           d="inline"

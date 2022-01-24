@@ -13,13 +13,13 @@ function MyApp({ Component, pageProps }) {
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <ChakraProvider theme={theme}>
           <Head>
-            <title>snxVest</title>
-            <meta name="description" content="SNX Grant Management" />
+            <title>tokenvest</title>
+            <meta name="description" content="Token Grant Management" />
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <Container as="main" maxW='container.md'>
             <Flex as="header" pt={9} pb={6}>
-              <Heading size="lg" fontWeight="light">snxVest</Heading>
+              <Heading size="lg" fontWeight="thin" letterSpacing="1px">tokenvest</Heading>
               <Box ml="auto">
                 <WalletConnector />
               </Box>
@@ -28,7 +28,7 @@ function MyApp({ Component, pageProps }) {
           </Container>
         </ChakraProvider>
       </UseWalletProvider>
-    </RecoilRoot>
+    </RecoilRoot >
   )
 }
 

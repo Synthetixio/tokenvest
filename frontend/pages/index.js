@@ -11,7 +11,7 @@ export default function Home() {
         {wallet.status === 'connected' ? (
           <UserGrants />
         ) : (
-          <Text textAlign="center" py={16} fontWeight="thin" fontSize="3xl" letterSpacing={1.5}>Connect your wallet to view your SNX grant and redeem available tokens.</Text>
+          <Text textAlign="center" py={16} fontWeight="thin" fontSize="3xl" letterSpacing={1.5}>Connect your wallet to view your grants and redeem available tokens.</Text>
         )}
       </main>
     </div >

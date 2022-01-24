@@ -54,12 +54,12 @@ export default function Grants() {
                   <Text fontSize="xs" opacity={0.8}>{format(new Date(grant.cliffTimestamp.toNumber() * 1000), 'M/d/yy')} cliff</Text>
                 </Td>
                 <Td>
-                  <Text>{parseInt(ethers.utils.formatUnits(grant.vestAmount, 18)).toLocaleString()} SNX</Text>
+                  <Text>{parseInt(ethers.utils.formatUnits(grant.vestAmount, 18)).toLocaleString()} {grant.tokenSymbol}</Text>
                   <Text fontSize="xs" opacity={0.8}>every {formatDistance(new Date(0), new Date(grant.vestInterval * 1000))}</Text>
                 </Td>
                 <Td>
-                  <Text>{parseInt(ethers.utils.formatUnits(grant.amountRedeemed, 18)).toLocaleString()} SNX redeemed</Text>
-                  <Text fontSize="xs" opacity={0.8}>of {parseInt(ethers.utils.formatUnits(grant.totalAmount, 18)).toLocaleString()} SNX total</Text>
+                  <Text>{parseInt(ethers.utils.formatUnits(grant.amountRedeemed, 18)).toLocaleString()} {grant.tokenSymbol} redeemed</Text>
+                  <Text fontSize="xs" opacity={0.8}>of {parseInt(ethers.utils.formatUnits(grant.totalAmount, 18)).toLocaleString()} {grant.tokenSymbol} total</Text>
                 </Td>
                 <Td>
                   <GrantModal grant={grant} />

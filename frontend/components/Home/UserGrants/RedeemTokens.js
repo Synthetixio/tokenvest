@@ -7,7 +7,7 @@ import { useRecoilState } from 'recoil'
 import { getGrant, redeemGrant } from '../../../lib/store/grants'
 import { getEventsByTokenId } from '../../../lib/store/events'
 
-export default function ReedemSnx({ tokenId }) {
+export default function ReedemTokens({ tokenId }) {
   const [grant, setGrant] = useRecoilState(getGrant(tokenId));
   const [events, setEvents] = useRecoilState(getEventsByTokenId(tokenId));
 
@@ -35,11 +35,11 @@ export default function ReedemSnx({ tokenId }) {
       background="gray.900"
       py={5}
       px={6}>
-      <Heading size="lg" fontWeight="light"><Icon as={BsCash} boxSize={5} mr={2} />Redeem SNX</Heading>
+      <Heading size="lg" fontWeight="light"><Icon as={BsCash} boxSize={5} mr={2} />Redeem {grant.tokenSymbol}</Heading>
 
       <Flex align="center" mb={6}>
         <Box width="50%" pr={4} pt={2}>
-          <Text>You can redeem available SNX tokens. Available tokens do not expire.</Text>
+          <Text>You can redeem available {grant.tokenSymbol}. Available tokens do not expire.</Text>
         </Box>
         <Box width="50%" pr={4}>
           <Flex>
@@ -65,7 +65,7 @@ export default function ReedemSnx({ tokenId }) {
         </Box>
       </Flex>
 
-      <Checkbox mb={4} checked={exchangeMode} onChange={(e) => setExchangeMode(e.target.checked)}>I would like to exchange tokens when redeeming SNX.</Checkbox>
+      <Checkbox mb={4} checked={exchangeMode} onChange={(e) => setExchangeMode(e.target.checked)}>I would like to purchase this {grant.tokenSymbol}.</Checkbox>
 
       <FormControl d={!exchangeMode && "none"} mb={6}>
         <FormLabel>Optional Purchase Price</FormLabel>
@@ -78,7 +78,7 @@ export default function ReedemSnx({ tokenId }) {
         <FormHelperText>For tax reasons, you may elected to purchase these tokens rather than receive them like income. Consult a tax professional for more information.</FormHelperText>
       </FormControl>
 
-      <Button onClick={redeem} isLoading={loadingRedemption} isFullWidth size="lg" isDisabled={available == 0} colorScheme="blue">Redeem {available.toLocaleString()} SNX</Button>
+      <Button onClick={redeem} isLoading={loadingRedemption} isFullWidth size="lg" isDisabled={available == 0} colorScheme="blue">Redeem {available.toLocaleString()} {grant.tokenSymbol}</Button>
     </Box>
   )
 }

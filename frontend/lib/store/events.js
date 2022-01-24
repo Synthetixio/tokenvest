@@ -1,5 +1,6 @@
 import { atom, selector, selectorFamily } from "recoil";
 import { ethers } from 'ethers'
+import erc20Abi from '../../abis/SampleToken.json'
 import vesterAbi from '../../abis/Vester.json'
 
 /**** STATE ****/
@@ -51,11 +52,38 @@ export const fetchEvents = async (setEvents) => {
         }
     }
 
-    const grantUpdateFilter = vesterContract.filters.GrantUpdate();
-    const grantUpdateEvents = await vesterContract.queryFilter(grantUpdateFilter, 0, "latest");
-    for (const log of grantUpdateEvents) {
+    const grantUpdatedFilter = vesterContract.filters.GrantUpdated();
+    const grantUpdatedEvents = await vesterContract.queryFilter(grantUpdatedFilter, 0, "latest");
+    for (const log of grantUpdatedEvents) {
+        const erc20Contract = new ethers.Contract(log.args.tokenAddress, erc20Abi.abi, provider); // should be provider.getSigner() ?
+
         newEvents[`${log.transactionHash}-${log.logIndex}`] = {
-            type: "Grant Update",
+            type: "Grant Updated",
+            blockNumber: log.blockNumber,
+            timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
+            transactionHash: log.transactionHash,
+            tokenSymbol: await erc20Contract.symbol(),
+            ...log.args
+        }
+    }
+
+    const grantCreatedFilter = vesterContract.filters.GrantCreated();
+    const grantCreatedEvents = await vesterContract.queryFilter(grantCreatedFilter, 0, "latest");
+    for (const log of grantCreatedEvents) {
+        newEvents[`${log.transactionHash}-${log.logIndex}`] = {
+            type: "Grant Created",
+            blockNumber: log.blockNumber,
+            timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
+            transactionHash: log.transactionHash,
+            ...log.args
+        }
+    }
+
+    const grantDeletedFilter = vesterContract.filters.GrantDeleted();
+    const grantDeletedEvents = await vesterContract.queryFilter(grantDeletedFilter, 0, "latest");
+    for (const log of grantDeletedEvents) {
+        newEvents[`${log.transactionHash}-${log.logIndex}`] = {
+            type: "Grant Deleted",
             blockNumber: log.blockNumber,
             timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
             transactionHash: log.transactionHash,
@@ -64,5 +92,5 @@ export const fetchEvents = async (setEvents) => {
     }
 
     setEvents(newEvents)
-    return Promise.all([redemptionsEvents, grantUpdateEvents])
+    return Promise.all([redemptionsEvents, grantUpdatedEvents, grantCreatedEvents])
 }

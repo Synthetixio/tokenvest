@@ -92,6 +92,14 @@ export default function TokenBalance() {
       py={5}
       px={6}>
       <Heading size="lg" fontWeight="light"><Icon as={BsCashStack} boxSize={5} mr={2} />Token Balances</Heading>
+      <Text fontSize="sm" my="2">Grant recipients can redeem their tokens from <Link
+        d="inline"
+        borderBottom="1px rgba(255,255,255,0.66) dotted"
+        borderRadius={1}
+        _hover={{
+          textDecoration: "none",
+          borderBottom: "1px rgba(255,255,255,0.9) dotted",
+        }} href={`https://etherscan.io/token/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</Link>.</Text>
       {loadingData ?
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :
         (tokenData && tokenData.length ?
@@ -121,7 +129,7 @@ export default function TokenBalance() {
               })}
             </Tbody>
           </Table>
-          : <Text mt={14} mb={12} textAlign="center" opacity={0.8}>No tokens balances found</Text>)
+          : <Text mt={16} mb={14} textAlign="center" opacity={0.8}>No tokens balances found</Text>)
       }
       <Text fontSize="xs" textAlign="center" opacity={0.8}>Token balances provided by <Link
         d="inline"

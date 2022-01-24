@@ -64,8 +64,12 @@ export const fetchGrant = async (setGrant, tokenId) => {
     const amountAvailable = await vesterContract.availableForRedemption(tokenId)
     const owner = await vesterContract.ownerOf(tokenId)
 
+    const erc20Contract = new ethers.Contract(grantData.tokenAddress, erc20Abi.abi, provider); // should be provider.getSigner() ?
+    const tokenSymbol = await erc20Contract.symbol();
+
     setGrant({
         tokenId,
+        tokenSymbol,
         owner,
         amountVested,
         amountAvailable,
@@ -121,7 +125,7 @@ export const redeemGrant = async (tokenId, exchangeTokenAmount, exchangeTokenAdd
             if (tokenId.toNumber() == redeemedTokenId.toNumber()) {
                 toast({
                     title: 'Redemption Successful',
-                    description: `You have redeemed ${(amount / 10 ** 18).toLocaleString()} SNX.`,
+                    description: `You have redeemed ${(amount / 10 ** 18).toLocaleString()} tokens.`,
                     status: 'success',
                     position: 'top',
                     duration: 10000,

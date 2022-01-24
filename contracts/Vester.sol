@@ -19,17 +19,16 @@ contract Vester is ERC721Enumerable {
         uint64 startTimestamp;
         uint64 cliffTimestamp;
         uint32 vestInterval;
+        address tokenAddress;
     }
 
     address public owner;
     address public nominatedOwner;
-    address public immutable tokenAddress;
     uint public tokenCounter;
     mapping (uint => Grant) public grants;
 
-    constructor(string memory name, string memory symbol, address _owner, address _tokenAddress) ERC721(name, symbol) {
+    constructor(string memory name, string memory symbol, address _owner) ERC721(name, symbol) {
         owner = _owner;
-        tokenAddress = _tokenAddress;
     }
 
     /// @notice Redeem all available vested tokens
@@ -39,7 +38,7 @@ contract Vester is ERC721Enumerable {
         uint128 amount = availableForRedemption(tokenId);
         require(amount > 0, "You don't have any tokens currently available for redemption.");
 
-        IERC20 tokenContract = IERC20(tokenAddress);
+        IERC20 tokenContract = IERC20(grants[tokenId].tokenAddress);
         require(tokenContract.balanceOf(address(this)) >= amount, "More tokens must be transferred to this contract before you can redeem.");
 
         grants[tokenId].amountRedeemed += amount;
@@ -100,13 +99,15 @@ contract Vester is ERC721Enumerable {
     /// @notice Update the data pertaining to a grant
     /// @dev Only the owner of the contract may call this function.
     /// @param tokenId The ID of the grant
+    /// @param tokenAddress The address of the ERC-20 being granted
     /// @param startTimestamp The timestamp defining the start of the vesting schedule
     /// @param cliffTimestamp Before this timestamp, no tokens can be redeemed
     /// @param vestAmount The amount of tokens that will vest for the recipient each interval, denominated in tokens * 10^18
     /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
-    function updateGrant(uint tokenId, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {
+    function updateGrant(uint tokenId, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {
+        grants[tokenId].tokenAddress = tokenAddress;
         grants[tokenId].startTimestamp = startTimestamp;
         grants[tokenId].cliffTimestamp = cliffTimestamp;
         grants[tokenId].vestAmount = vestAmount;
@@ -114,20 +115,22 @@ contract Vester is ERC721Enumerable {
         grants[tokenId].amountRedeemed = amountRedeemed;
         grants[tokenId].vestInterval = vestInterval;
 
-        emit GrantUpdate(tokenId, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
+        emit GrantUpdated(tokenId, tokenAddress, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
     }
 
     /// @notice Create a new grant
     /// @dev Only the owner of the contract may call this function.
     /// @param granteeAddress The address of the grant recipient
+    /// @param tokenAddress The address of the ERC-20 being granted
     /// @param startTimestamp The timestamp defining the start of the vesting schedule
     /// @param cliffTimestamp Before this timestamp, no tokens can be redeemed
     /// @param vestAmount The amount of tokens that will vest for the recipient each interval, denominated in tokens * 10^18
     /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
-    function mint(address granteeAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) external onlyOwner {
-        updateGrant(tokenCounter, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
+    function mint(address granteeAddress, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) external onlyOwner {
+        emit GrantCreated(tokenCounter);
+        updateGrant(tokenCounter, tokenAddress, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
         tokenCounter++;
         _safeMint(granteeAddress, tokenCounter-1);
     }
@@ -138,6 +141,8 @@ contract Vester is ERC721Enumerable {
     function burn(uint tokenId) external onlyOwner {
         _burn(tokenId);
         delete grants[tokenId];
+
+        emit GrantDeleted(tokenId);
     }
 
     /// @notice Nominate a new owner
@@ -161,7 +166,9 @@ contract Vester is ERC721Enumerable {
     }
 
     event Redemption(uint indexed tokenId, address indexed redeemerAddress, uint128 amount);
-    event GrantUpdate(uint indexed tokenId, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval);
+    event GrantUpdated(uint indexed tokenId, address indexed tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval);
+    event GrantCreated(uint indexed tokenId);
+    event GrantDeleted(uint indexed tokenId);
     event Withdrawal(address indexed withdrawerAddress, address indexed withdrawalTokenAddress, uint amount);
     event OwnerNomination(address indexed newOwner);
     event OwnerUpdate(address indexed oldOwner, address indexed newOwner);
