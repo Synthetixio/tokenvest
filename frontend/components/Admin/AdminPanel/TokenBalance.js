@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Heading, Box, Text, Spinner, Table, Thead, Tbody, Tr, Th, Td, Button, useToast, Link } from '@chakra-ui/react'
+import { Heading, Box, Text, Spinner, Table, Thead, Tbody, Tr, Th, Td, Button, useToast, Link, LightMode } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { BsCashStack } from 'react-icons/bs'
 import { ethers } from 'ethers'
@@ -122,7 +122,9 @@ export default function TokenBalance() {
                       {token.balance / Math.pow(10, token.tokenInfo.decimals)} {token.tokenInfo.symbol}
                     </Td>
                     <Td>
-                      <Button colorScheme='green' onClick={() => queueWithdrawal(token.tokenInfo.address, token.balance)} size="sm">Queue Withdrawal</Button>
+                      <LightMode>
+                        <Button colorScheme='blue' float="right" onClick={() => queueWithdrawal(token.tokenInfo.address, token.balance)} size="sm">Queue Withdrawal</Button>
+                      </LightMode>
                     </Td>
                   </Tr>
                 )

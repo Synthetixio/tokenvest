@@ -9,7 +9,7 @@ export default function WalletConnector() {
 
   return wallet.status === 'connected' ? (
     <>
-      <Button key={1} leftIcon={<Icon as={BsCircleFill} color="green" style={{ transform: 'translateY(-1px)' }} />} mr={4} pointerEvents="none" background="blackAlpha.400"> {accountDisplay(wallet.account)}</Button>
+      <Button key={1} leftIcon={<Icon as={BsCircleFill} color="green" />} mr={4} pointerEvents="none" background="blackAlpha.400"> {accountDisplay(wallet.account)}</Button>
       <Button key={2} onClick={() => wallet.reset()}>Disconnect</Button>
     </>
   ) : (

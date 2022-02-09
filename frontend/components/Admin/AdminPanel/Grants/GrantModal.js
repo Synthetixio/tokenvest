@@ -12,7 +12,8 @@ import {
   FormControl,
   FormLabel,
   FormHelperText,
-  Input
+  Input,
+  LightMode
 } from '@chakra-ui/react'
 import { EditIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
@@ -137,7 +138,7 @@ export default function GrantModal({ grant }) {
   return (<>
     {grant ?
       <EditIcon onClick={openHandler} cursor="pointer" boxSize={4} mr={2} /> :
-      <Button onClick={openHandler} ml="auto" colorScheme="green" size="sm">Create Grant</Button>
+      <LightMode><Button onClick={openHandler} ml="auto" colorScheme="blue" size="sm">Create Grant</Button></LightMode>
     }
     <Modal size="lg" isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -202,9 +203,11 @@ export default function GrantModal({ grant }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button colorScheme='blue' isFullWidth mb={3} onClick={queueTransaction}>
-            Queue Transaction
-          </Button>
+          <LightMode>
+            <Button colorScheme='blue' isFullWidth mb={3} onClick={queueTransaction}>
+              Queue Transaction
+            </Button>
+          </LightMode>
         </ModalFooter>
       </ModalContent>
     </Modal></>

@@ -1,4 +1,4 @@
-import { Heading, Progress, Flex, Box, Text } from '@chakra-ui/react'
+import { Heading, Progress, Flex, Box, Text, LightMode } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { BsClockHistory } from 'react-icons/bs'
 import { ethers } from 'ethers'
@@ -45,7 +45,9 @@ export default function GrantStatus({ tokenId }) {
         </Box>
         <Box width="50%">
           <Heading size="md" fontWeight="medium" mb={1}>{(amountVested / totalAmount * 100).toLocaleString()}% Vested</Heading>
-          <Progress colorScheme='green' size='sm' borderRadius={8} value={amountVested / totalAmount * 100} />
+          <LightMode>
+            <Progress colorScheme='green' size='sm' background="gray.700" borderRadius={8} value={amountVested / totalAmount * 100} />
+          </LightMode>
           <Text opacity={0.8} fontSize="sm">{amountVested && amountVested.toLocaleString()} {grant.tokenSymbol} of {totalAmount && totalAmount.toLocaleString()} {grant.tokenSymbol}</Text>
         </Box>
       </Flex>

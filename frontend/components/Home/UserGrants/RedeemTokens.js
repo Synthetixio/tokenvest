@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heading, Input, Button, FormControl, FormHelperText, Flex, Box, FormLabel, Text, Checkbox, Grid } from '@chakra-ui/react'
+import { Heading, Input, Button, FormControl, FormHelperText, Flex, Box, FormLabel, Text, Checkbox, Grid, LightMode } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { BsCash } from 'react-icons/bs'
 import { ethers } from 'ethers'
@@ -77,8 +77,9 @@ export default function ReedemTokens({ tokenId }) {
 
         <FormHelperText>For tax reasons, you may elected to purchase these tokens rather than receive them like income. Consult a tax professional for more information.</FormHelperText>
       </FormControl>
-
-      <Button onClick={redeem} isLoading={loadingRedemption} isFullWidth size="lg" isDisabled={available == 0} colorScheme="blue">Redeem {available.toLocaleString()} {grant.tokenSymbol}</Button>
+      <LightMode>
+        <Button onClick={redeem} isLoading={loadingRedemption} isFullWidth size="lg" isDisabled={available == 0} colorScheme="blue">Redeem {available.toLocaleString()} {grant.tokenSymbol}</Button>
+      </LightMode>
     </Box>
   )
 }

@@ -14,16 +14,16 @@ export default function RecentActivity({ tokenId }) {
       mb={4}
       borderRadius="md"
       background="gray.900"
-      py={5}
+      pt={5}
       px={6}>
       <Heading size="lg" fontWeight="light"><Icon as={BsCalendarWeek} boxSize={5} mr={2} />Recent Activity</Heading>
       {events.length ? events.slice().sort((a, b) => (b.blockNumber - a.blockNumber)).map((event, ind) => {
-        return (<Box borderBottom={ind + 1 != events.length && "1px solid rgba(0,0,0,0.33)"} py={4} key={ind}>
+        return (<Box borderBottom={ind + 1 != events.length && "1px solid rgba(255,255,255,0.1)"} py={4} key={ind}>
           <Flex w="100%" mb={3}>
             <Heading d="inline" size="md" fontWeight="medium">
               {event.type}
             </Heading>
-            <Box ml="auto">
+            <Box ml="auto" transform="translateY(-2px)">
               {tokenId == undefined &&
                 <Text
                   d="inline-block"
@@ -50,7 +50,7 @@ export default function RecentActivity({ tokenId }) {
           </Flex>
 
           {event.type == "Redemption" && <Text fontSize="lg" mt={-1.5}>{parseFloat(ethers.utils.formatUnits(event.amount, 18)).toLocaleString()} {event.tokenSymbol} redeemed by {event.redeemerAddress}.</Text>}
-          {event.type == "Grant Update" && <Flex>
+          {event.type == "Grant Updated" && <Flex>
             <Box>
               <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8} mb={0.5}>Start Date</Text>
               <Text>{format(new Date(event.startTimestamp.toNumber() * 1000), 'PPP')} <Text d="inline" fontSize="xs" opacity={0.8}>{format(new Date(event.cliffTimestamp.toNumber() * 1000), 'M/d/yy')} cliff</Text></Text>

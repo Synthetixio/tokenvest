@@ -13,13 +13,12 @@ function MyApp({ Component, pageProps }) {
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <ChakraProvider theme={theme}>
           <Head>
-            <title>tokenvest</title>
-            <meta name="description" content="Token Grant Management" />
-            <link rel="icon" href="/favicon.ico" />
+            <title>Tokenvest</title>
+            <meta name="description" content="Token Grant Manager" />
           </Head>
           <Container as="main" maxW='container.md'>
             <Flex as="header" pt={9} pb={6}>
-              <Heading size="lg" fontWeight="thin" letterSpacing="1px">tokenvest</Heading>
+              <Heading size="lg" fontWeight="thin" letterSpacing="1px">Tokenvest</Heading>
               <Box ml="auto">
                 <WalletConnector />
               </Box>
