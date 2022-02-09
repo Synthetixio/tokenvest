@@ -193,7 +193,7 @@ describe("Vester", function () {
     await network.provider.send("evm_mine")
     await expect(this.vester.connect(grantee).redeem(0)).to.be.reverted;
 
-    // The user should be able to redeem two quarters worth of SNX.
+    // The user should be able to redeem two quarters worth of tokens.
     await network.provider.send("evm_increaseTime", [7889400])
     await network.provider.send("evm_mine")
     await this.vester.connect(grantee).redeem(0)

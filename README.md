@@ -1,4 +1,4 @@
-# SNX Vester
+# Tokenvest
 
 ## Overview
 

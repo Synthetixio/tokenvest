@@ -10,7 +10,7 @@ async function main() {
   const sampleToken = await SampleToken.deploy();
 
   const Vester = await hre.ethers.getContractFactory("Vester");
-  const vester = await Vester.deploy("SNX Grant", "gSNX", testerAddress);
+  const vester = await Vester.deploy("Token Grant", "gTKN", testerAddress);
 
   await vester.deployed();
 
