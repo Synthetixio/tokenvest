@@ -14,6 +14,8 @@
     "@emotion/styled": "^11.6.0",
     "@gnosis.pm/safe-core-sdk": "^0.3.1",
     "@gnosis.pm/safe-service-client": "^0.1.1",
+    "@usedapp/core": "^0.11.0",
+    "@walletconnect/web3-provider": "^1.7.5",
     "date-fns": "^2.27.0",
     "ethers": "^5.5.2",
     "framer-motion": "^5.3.3",
@@ -22,7 +24,7 @@
     "react-dom": "17.0.2",
     "react-icons": "^4.3.1",
     "recoil": "^0.5.2",
-    "use-wallet": "^0.13.4"
+    "web3modal": "^1.9.5"
   },
   "devDependencies": {
     "eslint": "8.5.0",

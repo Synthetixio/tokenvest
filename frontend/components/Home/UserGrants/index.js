@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useWallet } from 'use-wallet'
 import { Box, Text, Spinner, Link } from '@chakra-ui/react'
 import { InfoOutlineIcon } from '@chakra-ui/icons'
 import GrantStatus from './GrantStatus'
@@ -8,11 +7,12 @@ import RecentActivity from '../../shared/RecentActivity'
 import { useRecoilState } from 'recoil'
 import { getGrantsByUser, fetchGrants } from '../../../lib/store/grants'
 import { eventsState, fetchEvents } from '../../../lib/store/events'
+import { useEthers } from '@usedapp/core'
 
 export default function UserGrants() {
-  const wallet = useWallet()
+  const { account } = useEthers()
 
-  const [grants, setGrant] = useRecoilState(getGrantsByUser(wallet.account));
+  const [grants, setGrant] = useRecoilState(getGrantsByUser(account));
   const [events, setEvents] = useRecoilState(eventsState);
   const [loadingData, setLoadingData] = useState(true);
 

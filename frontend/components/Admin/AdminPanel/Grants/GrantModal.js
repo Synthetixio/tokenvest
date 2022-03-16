@@ -13,11 +13,13 @@ import {
   FormLabel,
   FormHelperText,
   Input,
-  LightMode
+  LightMode,
+  SimpleGrid
 } from '@chakra-ui/react'
 import { EditIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
 import SafeBatchSubmitter from "../../../../lib/utils/SafeBatchSubmitter.js";
+import vesterAbi from '../../../../abis/Vester.json'
 import { useToast } from '@chakra-ui/react'
 
 export default function GrantModal({ grant }) {
@@ -72,7 +74,7 @@ export default function GrantModal({ grant }) {
     } catch {
       toast({
         title: "Couldn’t Queue Transaction",
-        description: `Make sure any addresses are valid.`,
+        description: `Make sure all addresses are valid.`,
         status: "error",
         isClosable: true,
       });
@@ -133,6 +135,76 @@ export default function GrantModal({ grant }) {
         isClosable: true,
       });
     }
+  }
+
+  const executeTransaction = async () => {
+
+    const provider = new ethers.providers.Web3Provider(window?.ethereum)
+    const signer = provider.getSigner();
+    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, signer);
+
+    let checksummedTokenAddress, checksummedGranteeAddress;
+    try {
+      checksummedTokenAddress = ethers.utils.getAddress(tokenAddress)
+      if (!grant) {
+        checksummedGranteeAddress = ethers.utils.getAddress(granteeAddress)
+      }
+    } catch {
+      toast({
+        title: "Couldn’t Execute Transaction",
+        description: `Make sure any addresses are valid.`,
+        status: "error",
+        isClosable: true,
+      });
+      return
+    }
+
+    const args = grant ? [
+      grant.tokenId,
+      checksummedTokenAddress,
+      startTimestamp,
+      cliffTimestamp,
+      ethers.utils.parseEther(vestAmount.toString()),
+      ethers.utils.parseEther(totalAmount.toString()),
+      ethers.utils.parseEther(amountRedeemed.toString()),
+      vestInterval,
+    ] : [
+      checksummedGranteeAddress,
+      checksummedTokenAddress,
+      startTimestamp,
+      cliffTimestamp,
+      ethers.utils.parseEther(vestAmount.toString()),
+      ethers.utils.parseEther(totalAmount.toString()),
+      ethers.utils.parseEther(amountRedeemed.toString()),
+      vestInterval,
+    ]
+
+    try {
+      if (grant) {
+        await vesterContract.updateGrant(...args)
+      } else {
+        await vesterContract.mint(...args)
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err.data.message,
+        status: "error",
+        isClosable: true,
+      });
+      return
+    }
+
+    toast({
+      title: 'Transaction Submitted',
+      description:
+        'Refer to your wallet for the latest status of this transaction. Refresh the page for an updated list of grants.',
+      status: 'info',
+      position: 'top',
+      duration: 10000,
+      isClosable: true,
+    })
+
   }
 
   return (<>
@@ -204,9 +276,14 @@ export default function GrantModal({ grant }) {
 
         <ModalFooter>
           <LightMode>
-            <Button colorScheme='blue' isFullWidth mb={3} onClick={queueTransaction}>
-              Queue Transaction
-            </Button>
+            <SimpleGrid columns={2} spacing={6} w="100%">
+              <Button colorScheme='blue' isFullWidth mb={3} onClick={executeTransaction}>
+                Execute Transaction
+              </Button>
+              <Button colorScheme='blue' isFullWidth mb={3} onClick={queueTransaction}>
+                Queue to Multisig
+              </Button>
+            </SimpleGrid>
           </LightMode>
         </ModalFooter>
       </ModalContent>

@@ -20,7 +20,7 @@ Holders of the NFT are able to redeem available tokens using the `redeem()` or `
 ## Development Environment
 
 * Run `npx hardhat node`
-* In a seperate tab, `npx hardhat run --network localhost scripts/local-deploy.js`.
+* In a seperate tab, `npx hardhat run --network localhost scripts/local-deploy.js`
 * Then start the front end, `cd frontend && npm run dev`
 
 ## Technical Specification

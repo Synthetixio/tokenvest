@@ -68,7 +68,7 @@ export default function RecentActivity({ tokenId }) {
           </Flex>}
 
         </Box>)
-      }) : (<Text textAlign="center" mt={6} mb={3}>
+      }) : (<Text textAlign="center" mt={6} pb={6}>
         No activity found for this grant.
       </Text>)}
     </Box >

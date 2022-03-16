@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useWallet } from 'use-wallet'
 import { Text, Link, Spinner } from '@chakra-ui/react'
 import { InfoOutlineIcon } from '@chakra-ui/icons'
 import Grants from './Grants'
@@ -10,8 +9,6 @@ import { getGrants, fetchGrants } from '../../../lib/store/grants'
 import { eventsState, fetchEvents } from '../../../lib/store/events'
 
 export default function AdminPanel() {
-  const wallet = useWallet()
-
   const [grants, setGrant] = useRecoilState(getGrants());
   const [events, setEvents] = useRecoilState(eventsState);
   const [loadingData, setLoadingData] = useState(true);

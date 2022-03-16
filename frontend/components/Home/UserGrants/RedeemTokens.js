@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heading, Input, Button, FormControl, FormHelperText, Flex, Box, FormLabel, Text, Checkbox, Grid, LightMode } from '@chakra-ui/react'
+import { Heading, Input, Button, FormControl, Flex, Box, FormLabel, Text, Checkbox, Grid, LightMode } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { BsCash } from 'react-icons/bs'
 import { ethers } from 'ethers'
@@ -74,8 +74,6 @@ export default function ReedemTokens({ tokenId }) {
           <Input type="number" value={exchangeTokenAmount} onChange={(e) => setExchangeTokenAmount(e.target.value)} placeholder='Enter Amount' />
           <Input value={exchangeTokenAddress} onChange={(e) => setExchangeTokenAddress(e.target.value)} placeholder='Enter Token Address' />
         </Grid>
-
-        <FormHelperText>For tax reasons, you may elected to purchase these tokens rather than receive them like income. Consult a tax professional for more information.</FormHelperText>
       </FormControl>
       <LightMode>
         <Button onClick={redeem} isLoading={loadingRedemption} isFullWidth size="lg" isDisabled={available == 0} colorScheme="blue">Redeem {available.toLocaleString()} {grant.tokenSymbol}</Button>

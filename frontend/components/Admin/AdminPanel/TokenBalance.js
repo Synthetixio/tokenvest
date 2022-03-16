@@ -10,11 +10,19 @@ export default function TokenBalance() {
 
   const [loadingData, setLoadingData] = useState(false);
   const [tokenData, setTokenData] = useState({})
+  const [chainId, setChainId] = useState(null)
 
   const contractAddress = process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS
 
   useEffect(() => {
-    loadData()
+    (async function () {
+      const provider = new ethers.providers.Web3Provider(window?.ethereum)
+      const resp = await provider.getNetwork()
+      if (resp.chainId == 1) {
+        loadData()
+      }
+      setChainId(resp.chainId)
+    })();
   }, [])
 
   const loadData = async () => {
@@ -99,8 +107,8 @@ export default function TokenBalance() {
         _hover={{
           textDecoration: "none",
           borderBottom: "1px rgba(255,255,255,0.9) dotted",
-        }} href={`https://etherscan.io/token/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</Link>.</Text>
-      {loadingData ?
+        }} href={`https://${chainId == 10 ? 'optimistic.' : ''}etherscan.io/address/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</Link>.</Text>
+      {chainId == 1 && (loadingData ?
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :
         (tokenData && tokenData.length ?
           <Table size="sm" variant='simple' my={3}>
@@ -132,15 +140,17 @@ export default function TokenBalance() {
             </Tbody>
           </Table>
           : <Text mt={16} mb={14} textAlign="center" opacity={0.8}>No tokens balances found</Text>)
+      )}
+      {chainId == 1 &&
+        <Text fontSize="xs" textAlign="center" opacity={0.8}>Token balances provided by <Link
+          d="inline"
+          borderBottom="1px rgba(255,255,255,0.66) dotted"
+          borderRadius={1}
+          _hover={{
+            textDecoration: "none",
+            borderBottom: "1px rgba(255,255,255,0.9) dotted",
+          }} href={`https://ethplorer.io/address/${contractAddress}`} isExternal>ethplorer</Link></Text>
       }
-      <Text fontSize="xs" textAlign="center" opacity={0.8}>Token balances provided by <Link
-        d="inline"
-        borderBottom="1px rgba(255,255,255,0.66) dotted"
-        borderRadius={1}
-        _hover={{
-          textDecoration: "none",
-          borderBottom: "1px rgba(255,255,255,0.9) dotted",
-        }} href={`https://ethplorer.io/address/${contractAddress}`} isExternal>ethplorer</Link></Text>
     </Box >
   )
 }

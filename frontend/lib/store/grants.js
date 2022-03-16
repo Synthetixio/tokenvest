@@ -82,7 +82,6 @@ export const fetchGrant = async (setGrant, tokenId) => {
 export const fetchGrants = async (setGrant) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
-
     let promises = []
 
     const totalSupply = await vesterContract.totalSupply();
