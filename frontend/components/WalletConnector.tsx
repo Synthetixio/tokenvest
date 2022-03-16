@@ -15,7 +15,7 @@ const Web3ModalButton = () => {
 
   useEffect(() => {
     if (error) {
-      useToast({
+      toast({
         title: 'Error',
         description: error.message,
       })
