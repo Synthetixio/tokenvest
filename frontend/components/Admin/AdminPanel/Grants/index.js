@@ -51,7 +51,7 @@ export default function Grants() {
                 </Td>
                 <Td>
                   <Text>{format(new Date(grant.startTimestamp.toNumber() * 1000), 'MMM. d ’yy')} start</Text>
-                  <Text fontSize="xs" opacity={0.8}> {format(new Date(grant.cliffTimestamp.toNumber() * 1000), 'M/d/yy')} cliff</Text>
+                  <Text fontSize="xs" opacity={0.8}> {format(new Date(grant.cliffTimestamp.toNumber() * 1000), 'MMM. d ’yy')} cliff</Text>
                 </Td>
                 <Td>
                   <Text>{parseInt(ethers.utils.formatUnits(grant.vestAmount, 18)).toLocaleString()} {grant.tokenSymbol}</Text>
