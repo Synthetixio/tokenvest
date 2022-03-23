@@ -86,12 +86,20 @@ contract Vester is ERC721Enumerable {
         return amount;
     }
 
+    /// @notice Supply tokens to this contract so that tokens don't need to be sent directly to contract
+    /// @param tokenAddress The address of the ERC20 token to supply
+    /// @param amount amount to supply
+    function supply(address tokenAddress, uint amount) external {
+        IERC20(tokenAddress).safeTransferFrom(msg.sender, address(this), amount);
+
+        emit Supply(msg.sender, tokenAddress, amount);
+    }
+
     /// @notice Withdraw tokens owned by this contract to the caller
     /// @dev Only the owner of the contract may call this function.
     /// @param withdrawalTokenAddress The address of the ERC20 token to redeem
     function withdraw(address withdrawalTokenAddress, uint withdrawalTokenAmount) public onlyOwner {
-        IERC20 tokenContract = IERC20(withdrawalTokenAddress);
-        tokenContract.safeTransfer(msg.sender, withdrawalTokenAmount);
+        IERC20(withdrawalTokenAddress).safeTransfer(msg.sender, withdrawalTokenAmount);
 
         emit Withdrawal(msg.sender, withdrawalTokenAddress, withdrawalTokenAmount);
     }
@@ -169,6 +177,7 @@ contract Vester is ERC721Enumerable {
     event GrantUpdated(uint indexed tokenId, address indexed tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval);
     event GrantCreated(uint indexed tokenId);
     event GrantDeleted(uint indexed tokenId);
+    event Supply(address supplierAddress, address indexed tokenAddress, uint amount);
     event Withdrawal(address indexed withdrawerAddress, address indexed withdrawalTokenAddress, uint amount);
     event OwnerNomination(address indexed newOwner);
     event OwnerUpdate(address indexed oldOwner, address indexed newOwner);

@@ -20,8 +20,8 @@ Holders of the NFT are able to redeem available tokens using the `redeem()` or `
 ## Development Environment
 
 * Run `npx hardhat node`
-* In a seperate tab, `npx hardhat run --network localhost scripts/local-deploy.js`
-* Then start the front end, `cd frontend && npm run dev`
+* In a separate tab, `npx hardhat run --network localhost scripts/local-deploy.js`
+* Then start the front end, `cd frontend && npm run dev` (ensure to `npm i` here as well). Owner is HH wallet 0, grantee is HH wallet 1.
 
 ## Technical Specification
 
@@ -31,7 +31,7 @@ This an ERC-721 contract that implements the enumerable extension. Each NFT corr
 
 * The contract has a single owner, initialized in the constructor.
 * Ownership can be transferred by nominating a new owner using the `nominateOwner()` function. The nominated owner can then claim ownership by calling `acceptOwnership()`. Only the current owner should be able to nominate a new owner. Only the nominated owner (`nominatedOwner`) should be able to accept ownership.
-* The owner is expected to transfer the tokens being granted with this contract (`tokenAddress`) to the contract, though anyone could transfer any tokens to this contract.
+* The owner is expected to supply tokens being granted with this contract (`tokenAddress`) to the contract using `supply()`, though anyone could transfer any tokens to this contract.
 * The owner, and only the owner, should be able to withdraw all of any token from the contract using the `withdraw()` method.
 * The owner, and only the owner, can issue a new grant using the `mint()` function, specifying the grantee's address and all of the properties in the `Grant` struct. `tokenCounter` increments such that each grant always has a unique ID.
 * The owner, and only the owner, can update a grant based on it's token ID. They should be able to update all properties in the `Grant` struct.

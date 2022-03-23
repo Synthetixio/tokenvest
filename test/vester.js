@@ -104,7 +104,7 @@ describe("Vester", function () {
   })
 
   // Grant Transfer
-  it("Should allow a grant to be transfered", async function () {
+  it("Should allow a grant to be transferred", async function () {
     const [owner, grantee, futureGrantee] = await ethers.getSigners();
     const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp
 
@@ -155,6 +155,26 @@ describe("Vester", function () {
 
     expect(await this.tokenContract.balanceOf(grantee.address)).to.equal(ethers.utils.parseEther("30000").div(4).div(3).mul(2));
     expect(await incomingTokenContract.balanceOf(this.vester.address)).to.equal(ethers.utils.parseEther("1000"));
+  });
+
+  // Supply
+  it("Should allow tokens to be supplied by anyone", async function () {
+    const [, , someoneElse] = await ethers.getSigners();
+
+    await this.tokenContract.mint(someoneElse.address, ethers.utils.parseEther("1000"))
+
+    const amount = ethers.utils.parseEther("500");
+    // approve tokens to vester
+    await this.tokenContract.connect(someoneElse).approve(this.vester.address, amount);
+
+    // supply
+    await this.vester.connect(someoneElse).supply(this.tokenContract.address, amount);
+
+    // contract should have tokens now
+    expect(await this.tokenContract.balanceOf(this.vester.address)).to.equal(amount);
+
+    // no allowance
+    await expect(this.vester.connect(someoneElse).supply(this.tokenContract.address, amount)).to.revertedWith("allowance");
   });
 
   // Withdrawal
