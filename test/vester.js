@@ -156,6 +156,31 @@ describe("Vester", function () {
     expect(await this.tokenContract.balanceOf(grantee.address)).to.equal(ethers.utils.parseEther("30000").div(4).div(3).mul(2));
   });
 
+  it("Should allow multiple or all grants to be redeemed", async function () {
+    const [, grantee, someoneElse] = await ethers.getSigners();
+    const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp
+
+    await this.tokenContract.mint(this.vester.address, ethers.utils.parseEther("30000"))
+    // mint five tokens, one for someone else
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp, ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp, ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp, ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp, ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(someoneElse.address, this.tokenContract.address, currentTimestamp, currentTimestamp, ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await network.provider.send("evm_increaseTime", [7889400])
+    await network.provider.send("evm_mine")
+
+    // redeem specific two
+    await this.vester.connect(grantee).redeemMultiple([0, 1]);
+    // two redeemed
+    expect(await this.tokenContract.balanceOf(grantee.address)).to.equal(ethers.utils.parseEther("2500").mul(2));
+
+    // two more are redeemed by redeemAll
+    await this.vester.connect(grantee).redeemAll();
+    // two more were redeemed
+    expect(await this.tokenContract.balanceOf(grantee.address)).to.equal(ethers.utils.parseEther("2500").mul(4));
+  });
+
   it("Should allow tokens to be redeemed with a token deposit", async function () {
     const [owner, grantee] = await ethers.getSigners();
     const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp

@@ -4,11 +4,12 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /// @title Vesting Contract
 /// @author Noah Litvin (@noahlitvin)
 /// @notice This contract allows the recipient of a grant to redeem tokens each vesting interval, up to a total amount with an optional cliff.
-contract Vester is ERC721Enumerable {
+contract Vester is ERC721Enumerable, ReentrancyGuard {
 
     using SafeERC20 for IERC20;
 
@@ -32,14 +33,45 @@ contract Vester is ERC721Enumerable {
         owner = _owner;
     }
 
-    /// @notice Redeem all available vested tokens
-    function redeem(uint tokenId) public {
+    /// @notice Redeem all available vested tokens from a single grant
+    function redeem(uint tokenId) public {        
+        _redeem(tokenId, true);
+    }
+
+    /// @notice Redeem multiple token grants, any failure will revert all redeems
+    function redeemMultiple(uint[] calldata tokenIds) public {
+        for (uint i = 0; i < tokenIds.length; i++) {
+            redeem(tokenIds[i]);
+        }
+    }
+
+    /// @notice Redeem all available vested tokens from all grants, may run out of gas, in which case
+    /// use redeemMultiple(). Any failure will revert all redeems.
+    function redeemAll() public {
+        uint numTokens = balanceOf(msg.sender); // number of tokens owned by sender
+        for (uint i = 0; i < numTokens; i++) {
+            // skip non vested grants silently
+            _redeem(tokenOfOwnerByIndex(msg.sender, i), false);
+        }
+    }
+
+    /// @dev nonReentrant because may be used in a loop (with different tokens)
+    function _redeem(uint tokenId, bool requireNonZero) internal nonReentrant {
         require(ownerOf(tokenId) == msg.sender, "You don't own this grant.");
 
         uint128 amount = availableForRedemption(tokenId);
-        require(amount > 0, "No tokens available for redemption");
+
+        if (amount == 0) {
+            if (requireNonZero) {
+                revert("No tokens available for redemption");        
+            } else {
+                return; // nothing to do
+            }
+        }
 
         IERC20 tokenContract = IERC20(grants[tokenId].tokenAddress);
+
+        // this is for clarity only (safetransfer revert may be less clear)
         require(tokenContract.balanceOf(address(this)) >= amount, "More tokens must be transferred to this contract before you can redeem.");
 
         grants[tokenId].amountRedeemed += amount;
@@ -124,7 +156,7 @@ contract Vester is ERC721Enumerable {
     /// @param vestInterval The vesting period in seconds
     function replaceGrant(uint tokenId, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {        
         cancelGrant(tokenId);
-        mint(ownerOf(tokenId), tokenAddress, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);        
+        mint(ownerOf(tokenId), tokenAddress, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
     }
 
     /// @notice Create a new grant
@@ -145,7 +177,7 @@ contract Vester is ERC721Enumerable {
 
         uint tokenId = tokenCounter;
         tokenCounter++;
-        
+
         grants[tokenId] = Grant({
             vestAmount: vestAmount,
             totalAmount: totalAmount,

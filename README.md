@@ -13,10 +13,11 @@ Each grant is represented as an NFT. It has the following properties:
 - `vestAmount` - The amount of tokens that will vest each interval.
 - `totalAmount` - The total amount of tokens that will vest for this grant.
 - `amountRedeemed` - The amount of tokens already redeemed under this grant.
+- `cancelled` - Whether this grant was cancelled by the contract, this is the only mutable property.
 
 The contract owner is able to manage grants using the `mint()`, `cancelGrant()`, and `replaceGrant()` functions. The owner can also withdraw tokens using the `withdraw()` function. The dApp assumes this will be a multisig wallet on Gnosis Safe. Ownership can be transferred using the `nominateOwner()` and `acceptOwnership()` functions.
 
-Holders of the NFT are able to redeem available tokens using the `redeem()` or `redeemWithTransfer()` methods.
+Holders of the NFT are able to redeem available tokens using the `redeem()`, `redeemMultiple()`, `redeemAll()`, or `redeemWithTransfer()` methods.
 
 ## Development Environment
 
