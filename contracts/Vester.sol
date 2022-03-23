@@ -20,6 +20,7 @@ contract Vester is ERC721Enumerable {
         uint64 cliffTimestamp;
         uint32 vestInterval;
         address tokenAddress;
+        bool cancelled;
     }
 
     address public owner;
@@ -36,7 +37,7 @@ contract Vester is ERC721Enumerable {
         require(ownerOf(tokenId) == msg.sender, "You don't own this grant.");
 
         uint128 amount = availableForRedemption(tokenId);
-        require(amount > 0, "You don't have any tokens currently available for redemption.");
+        require(amount > 0, "No tokens available for redemption");
 
         IERC20 tokenContract = IERC20(grants[tokenId].tokenAddress);
         require(tokenContract.balanceOf(address(this)) >= amount, "More tokens must be transferred to this contract before you can redeem.");
@@ -57,11 +58,12 @@ contract Vester is ERC721Enumerable {
     }
 
     /// @notice Calculate the amount of tokens currently available for redemption for a given grant
+    /// returns 0 if grant was cancelled
     /// @dev This subtracts the amount of previously redeemed token from the total amount that has vested.
     /// @param tokenId The ID of the grant
     /// @return The amount available for redemption, denominated in tokens * 10^18
     function availableForRedemption(uint tokenId) public view returns (uint128) {
-        return amountVested(tokenId) - grants[tokenId].amountRedeemed;
+        return grants[tokenId].cancelled ? 0 : amountVested(tokenId) - grants[tokenId].amountRedeemed;
     }
 
     /// @notice Calculate the amount that has vested for a given address
@@ -143,14 +145,13 @@ contract Vester is ERC721Enumerable {
         _safeMint(granteeAddress, tokenCounter-1);
     }
 
-    /// @notice Destroy a grant
+    /// @notice cancel a grant, cannot be undone (new grant has to be minted)
     /// @dev Only the owner of the contract may call this function.
     /// @param tokenId The ID of the grant
-    function burn(uint tokenId) external onlyOwner {
-        _burn(tokenId);
-        delete grants[tokenId];
-
-        emit GrantDeleted(tokenId);
+    function cancelGrant(uint tokenId) external onlyOwner {
+        require(!grants[tokenId].cancelled, "Already cancelled");
+        grants[tokenId].cancelled = true;
+        emit GrantCancelled(tokenId);
     }
 
     /// @notice Nominate a new owner
@@ -176,7 +177,7 @@ contract Vester is ERC721Enumerable {
     event Redemption(uint indexed tokenId, address indexed redeemerAddress, uint128 amount);
     event GrantUpdated(uint indexed tokenId, address indexed tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval);
     event GrantCreated(uint indexed tokenId);
-    event GrantDeleted(uint indexed tokenId);
+    event GrantCancelled(uint indexed tokenId);
     event Supply(address supplierAddress, address indexed tokenAddress, uint amount);
     event Withdrawal(address indexed withdrawerAddress, address indexed withdrawalTokenAddress, uint amount);
     event OwnerNomination(address indexed newOwner);

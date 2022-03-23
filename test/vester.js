@@ -42,7 +42,7 @@ describe("Vester", function () {
     await expect(this.vester.connect(user).withdraw(ZERO_ADDRESS, 1)).to.be.revertedWith('Only the owner can call this function.');
     await expect(this.vester.connect(user).updateGrant(1, this.tokenContract.address, 1, 1, 1, 1, 1, 1)).to.be.revertedWith('Only the owner can call this function.');
     await expect(this.vester.connect(user).mint(ZERO_ADDRESS, this.tokenContract.address, 1, 1, 1, 1, 1, 1)).to.be.revertedWith('Only the owner can call this function.');
-    await expect(this.vester.connect(user).burn(1)).to.be.revertedWith('Only the owner can call this function.');
+    await expect(this.vester.connect(user).cancelGrant(1)).to.be.revertedWith('Only the owner can call this function.');
     await expect(this.vester.connect(user).nominateOwner(ZERO_ADDRESS)).to.be.revertedWith('Only the owner can call this function.');
   });
 
@@ -90,17 +90,23 @@ describe("Vester", function () {
     expect(grantData.amountRedeemed).to.equal(0)
   })
 
-  it("Should allow a grant to be revoked", async function () {
+  it("Should allow a grant to be cancelled", async function () {
     const [owner, grantee] = await ethers.getSigners();
     const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp
 
-    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    await this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp - 7889400, currentTimestamp - 1, ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
     let grantData = await this.vester.grants(0)
     expect(grantData.totalAmount).to.equal(ethers.utils.parseEther("30000"))
 
     expect(await this.vester.balanceOf(grantee.address)).to.equal(1)
-    await this.vester.burn(0)
-    expect(await this.vester.balanceOf(grantee.address)).to.equal(0)
+    expect(await this.vester.availableForRedemption(0)).to.gt(0);
+    await this.vester.cancelGrant(0);
+    expect(await this.vester.balanceOf(grantee.address)).to.equal(1) // token is not burned
+    expect(await this.vester.availableForRedemption(0)).to.equal(0); // nothing can be redeemed
+    await expect(this.vester.connect(grantee).redeem(0)).to.revertedWith("No tokens available"); // nothing can be redeemed
+
+    // can't cancel twice
+    await expect(this.vester.cancelGrant(0)).to.revertedWith("Already cancelled"); // nothing can be redeemed
   })
 
   // Grant Transfer
@@ -229,8 +235,8 @@ describe("Vester", function () {
     expect(await this.tokenContract.balanceOf(grantee.address)).to.equal(ethers.utils.parseEther("7500"));
 
     // The owner, and only the owner, revokes the grantees grant.
-    await expect(this.vester.connect(grantee).burn(0)).to.be.reverted;
-    this.vester.connect(owner).burn(0);
+    await expect(this.vester.connect(grantee).cancelGrant(0)).to.be.reverted;
+    this.vester.connect(owner).cancelGrant(0);
 
     // Now the grantee can't redeem...
     await expect(this.vester.connect(grantee).redeem(0)).to.be.reverted;
