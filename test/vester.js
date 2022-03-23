@@ -61,6 +61,17 @@ describe("Vester", function () {
     expect(grantData.startTimestamp.toNumber()).to.be.closeTo(Date.now() / 1000, 100)
     expect(grantData.cliffTimestamp.toNumber()).to.be.closeTo((Date.now() / 1000) + (grantData.vestInterval * 2), 100)
     expect(grantData.vestInterval).to.equal(7889400)
+
+    // basic validation
+    await expect(
+      this.vester.mint(grantee.address, this.tokenContract.address, 0, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 7889400)
+    ).to.revertedWith("startTimestamp");
+    await expect(
+      this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), 0, 0)
+    ).to.revertedWith("vestInterval");
+    await expect(
+      this.vester.mint(grantee.address, this.tokenContract.address, currentTimestamp, currentTimestamp + (7889400 * 2), ethers.utils.parseEther("2500"), ethers.utils.parseEther("30000"), ethers.utils.parseEther("30001"), 7889400)
+    ).to.revertedWith("redeemed");
   });
 
   it("Should allow a grant to be replaced", async function () {

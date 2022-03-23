@@ -63,7 +63,13 @@ contract Vester is ERC721Enumerable {
     /// @param tokenId The ID of the grant
     /// @return The amount available for redemption, denominated in tokens * 10^18
     function availableForRedemption(uint tokenId) public view returns (uint128) {
-        return grants[tokenId].cancelled ? 0 : amountVested(tokenId) - grants[tokenId].amountRedeemed;
+        uint128 vested = amountVested(tokenId);
+        uint128 redeemed = grants[tokenId].amountRedeemed;
+        if (grants[tokenId].cancelled || vested < redeemed ) {
+            return 0;
+        } else {
+            return vested - redeemed;
+        }        
     }
 
     /// @notice Calculate the amount that has vested for a given address
@@ -132,8 +138,15 @@ contract Vester is ERC721Enumerable {
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
     function mint(address granteeAddress, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {
-        emit GrantCreated(tokenCounter);
-        grants[tokenCounter] = Grant({
+        // input validation
+        require(startTimestamp > 0, "startTimestamp is zero"); // probably immediately redeemable
+        require(vestInterval > 0, "vestInterval is zero"); // don't divide by zero
+        require(amountRedeemed <=  totalAmount, "redeemed higher than total"); 
+
+        uint tokenId = tokenCounter;
+        tokenCounter++;
+        
+        grants[tokenId] = Grant({
             vestAmount: vestAmount,
             totalAmount: totalAmount,
             amountRedeemed: amountRedeemed,
@@ -143,8 +156,8 @@ contract Vester is ERC721Enumerable {
             tokenAddress: tokenAddress,
             cancelled: false
         });
-        tokenCounter++;
-        _safeMint(granteeAddress, tokenCounter-1);
+        _safeMint(granteeAddress, tokenId);
+        emit GrantCreated(tokenId);
     }
 
     /// @notice cancel a grant, cannot be undone (new grant has to be minted)
