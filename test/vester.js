@@ -40,7 +40,7 @@ describe("Vester", function () {
     const [owner, user] = await ethers.getSigners();
 
     await expect(this.vester.connect(user).withdraw(ZERO_ADDRESS, 1)).to.be.revertedWith('Only the owner can call this function.');
-    await expect(this.vester.connect(user).updateGrant(1, this.tokenContract.address, 1, 1, 1, 1, 1, 1)).to.be.revertedWith('Only the owner can call this function.');
+    await expect(this.vester.connect(user).replaceGrant(1, this.tokenContract.address, 1, 1, 1, 1, 1, 1)).to.be.revertedWith('Only the owner can call this function.');
     await expect(this.vester.connect(user).mint(ZERO_ADDRESS, this.tokenContract.address, 1, 1, 1, 1, 1, 1)).to.be.revertedWith('Only the owner can call this function.');
     await expect(this.vester.connect(user).cancelGrant(1)).to.be.revertedWith('Only the owner can call this function.');
     await expect(this.vester.connect(user).nominateOwner(ZERO_ADDRESS)).to.be.revertedWith('Only the owner can call this function.');
@@ -63,7 +63,7 @@ describe("Vester", function () {
     expect(grantData.vestInterval).to.equal(7889400)
   });
 
-  it("Should allow a grant to be updated", async function () {
+  it("Should allow a grant to be replaced", async function () {
     const [owner, grantee] = await ethers.getSigners();
     const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp
 
@@ -73,7 +73,7 @@ describe("Vester", function () {
     expect(grantData.totalAmount).to.equal(ethers.utils.parseEther("30000"))
     expect(grantData.amountRedeemed).to.equal(0)
 
-    await this.vester.connect(owner).updateGrant(
+    await this.vester.connect(owner).replaceGrant(
       0,
       this.tokenContract.address,
       grantData.startTimestamp,
@@ -84,10 +84,14 @@ describe("Vester", function () {
       grantData.vestInterval,
     );
 
-    grantData = await this.vester.grants(0)
+    grantData = await this.vester.grants(1);
     expect(grantData.vestAmount).to.equal(ethers.utils.parseEther("3000"))
     expect(grantData.totalAmount).to.equal(ethers.utils.parseEther("40000"))
     expect(grantData.amountRedeemed).to.equal(0)
+
+    const prevGrant = await this.vester.grants(0);
+    expect(prevGrant.cancelled).to.equal(true);
+    expect(prevGrant.vestAmount).to.equal(ethers.utils.parseEther("2500")); // data unchanged
   })
 
   it("Should allow a grant to be cancelled", async function () {

@@ -14,7 +14,7 @@ Each grant is represented as an NFT. It has the following properties:
 - `totalAmount` - The total amount of tokens that will vest for this grant.
 - `amountRedeemed` - The amount of tokens already redeemed under this grant.
 
-The contract owner is able to manage grants using the `mint()`, `burn()`, and `updateGrant()` functions. The owner can also withdraw tokens using the `withdraw()` function. The dApp assumes this will be a multisig wallet on Gnosis Safe. Ownership can be transferred using the `nominateOwner()` and `acceptOwnership()` functions.
+The contract owner is able to manage grants using the `mint()`, `cancelGrant()`, and `replaceGrant()` functions. The owner can also withdraw tokens using the `withdraw()` function. The dApp assumes this will be a multisig wallet on Gnosis Safe. Ownership can be transferred using the `nominateOwner()` and `acceptOwnership()` functions.
 
 Holders of the NFT are able to redeem available tokens using the `redeem()` or `redeemWithTransfer()` methods.
 
@@ -35,7 +35,7 @@ This an ERC-721 contract that implements the enumerable extension. Each NFT corr
 - The owner is expected to supply tokens being granted with this contract (`tokenAddress`) to the contract using `supply()`, though anyone could transfer any tokens to this contract.
 - The owner, and only the owner, should be able to withdraw all of any token from the contract using the `withdraw()` method.
 - The owner, and only the owner, can issue a new grant using the `mint()` function, specifying the grantee's address and all of the properties in the `Grant` struct. `tokenCounter` increments such that each grant always has a unique ID.
-- The owner, and only the owner, can update a grant based on it's token ID. They should be able to update all properties in the `Grant` struct.
+- The owner, and only the owner, can replace a grant based on it's token ID. This should mint a replacement grant with new attributes to the previous grantee.
 - The owner, and only the owner, should be able to cancel a grant with the `cancelGrant()` function. No one, including the grantee assigned to that grant, should be able to redeem tokens based on a grant that has been cancelled.
 
 ### Grantee

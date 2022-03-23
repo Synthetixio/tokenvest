@@ -106,7 +106,7 @@ contract Vester is ERC721Enumerable {
         emit Withdrawal(msg.sender, withdrawalTokenAddress, withdrawalTokenAmount);
     }
 
-    /// @notice Update the data pertaining to a grant
+    /// @notice Replace an existing grant by cancelling the old one and minting a new one
     /// @dev Only the owner of the contract may call this function.
     /// @param tokenId The ID of the grant
     /// @param tokenAddress The address of the ERC-20 being granted
@@ -116,16 +116,9 @@ contract Vester is ERC721Enumerable {
     /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
-    function updateGrant(uint tokenId, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {
-        grants[tokenId].tokenAddress = tokenAddress;
-        grants[tokenId].startTimestamp = startTimestamp;
-        grants[tokenId].cliffTimestamp = cliffTimestamp;
-        grants[tokenId].vestAmount = vestAmount;
-        grants[tokenId].totalAmount = totalAmount;
-        grants[tokenId].amountRedeemed = amountRedeemed;
-        grants[tokenId].vestInterval = vestInterval;
-
-        emit GrantUpdated(tokenId, tokenAddress, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
+    function replaceGrant(uint tokenId, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {        
+        cancelGrant(tokenId);
+        mint(ownerOf(tokenId), tokenAddress, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);        
     }
 
     /// @notice Create a new grant
@@ -138,9 +131,18 @@ contract Vester is ERC721Enumerable {
     /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
-    function mint(address granteeAddress, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) external onlyOwner {
+    function mint(address granteeAddress, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {
         emit GrantCreated(tokenCounter);
-        updateGrant(tokenCounter, tokenAddress, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
+        grants[tokenCounter] = Grant({
+            vestAmount: vestAmount,
+            totalAmount: totalAmount,
+            amountRedeemed: amountRedeemed,
+            startTimestamp: startTimestamp,
+            cliffTimestamp: cliffTimestamp,
+            vestInterval: vestInterval,
+            tokenAddress: tokenAddress,
+            cancelled: false
+        });
         tokenCounter++;
         _safeMint(granteeAddress, tokenCounter-1);
     }
@@ -148,7 +150,7 @@ contract Vester is ERC721Enumerable {
     /// @notice cancel a grant, cannot be undone (new grant has to be minted)
     /// @dev Only the owner of the contract may call this function.
     /// @param tokenId The ID of the grant
-    function cancelGrant(uint tokenId) external onlyOwner {
+    function cancelGrant(uint tokenId) public onlyOwner {
         require(!grants[tokenId].cancelled, "Already cancelled");
         grants[tokenId].cancelled = true;
         emit GrantCancelled(tokenId);
@@ -175,7 +177,6 @@ contract Vester is ERC721Enumerable {
     }
 
     event Redemption(uint indexed tokenId, address indexed redeemerAddress, uint128 amount);
-    event GrantUpdated(uint indexed tokenId, address indexed tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval);
     event GrantCreated(uint indexed tokenId);
     event GrantCancelled(uint indexed tokenId);
     event Supply(address supplierAddress, address indexed tokenAddress, uint amount);
