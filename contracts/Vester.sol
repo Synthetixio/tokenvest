@@ -63,7 +63,7 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
 
         if (amount == 0) {
             if (requireNonZero) {
-                revert("No tokens available for redemption");        
+                revert("No tokens available for redemption of grant");        
             } else {
                 return; // nothing to do
             }
@@ -104,7 +104,7 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
         }        
     }
 
-    /// @notice Calculate the amount that has vested for a given address
+    /// @notice Calculate the amount that has vested for a given grant
     /// @param tokenId The ID of the grant
     /// @return The amount of vested tokens, denominated in tokens * 10^18
     function amountVested(uint tokenId) public view returns (uint128) {
