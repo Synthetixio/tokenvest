@@ -52,21 +52,6 @@ export const fetchEvents = async (setEvents) => {
         }
     }
 
-    const grantUpdatedFilter = vesterContract.filters.GrantUpdated();
-    const grantUpdatedEvents = await vesterContract.queryFilter(grantUpdatedFilter, 0, "latest");
-    for (const log of grantUpdatedEvents) {
-        const erc20Contract = new ethers.Contract(log.args.tokenAddress, erc20Abi.abi, provider); // should be provider.getSigner() ?
-
-        newEvents[`${log.transactionHash}-${log.logIndex}`] = {
-            type: "Grant Updated",
-            blockNumber: log.blockNumber,
-            timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
-            transactionHash: log.transactionHash,
-            tokenSymbol: await erc20Contract.symbol(),
-            ...log.args
-        }
-    }
-
     const grantCreatedFilter = vesterContract.filters.GrantCreated();
     const grantCreatedEvents = await vesterContract.queryFilter(grantCreatedFilter, 0, "latest");
     for (const log of grantCreatedEvents) {
@@ -79,11 +64,23 @@ export const fetchEvents = async (setEvents) => {
         }
     }
 
-    const grantDeletedFilter = vesterContract.filters.GrantDeleted();
-    const grantDeletedEvents = await vesterContract.queryFilter(grantDeletedFilter, 0, "latest");
-    for (const log of grantDeletedEvents) {
+    const grantCancelledFilter = vesterContract.filters.GrantCancelled();
+    const grantCancelledEvents = await vesterContract.queryFilter(grantCancelledFilter, 0, "latest");
+    for (const log of grantCancelledEvents) {
         newEvents[`${log.transactionHash}-${log.logIndex}`] = {
-            type: "Grant Deleted",
+            type: "Grant Cancelled",
+            blockNumber: log.blockNumber,
+            timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
+            transactionHash: log.transactionHash,
+            ...log.args
+        }
+    }
+
+    const supplyFilter = vesterContract.filters.Supply();
+    const supplyEvents = await vesterContract.queryFilter(supplyFilter, 0, "latest");
+    for (const log of supplyEvents) {
+        newEvents[`${log.transactionHash}-${log.logIndex}`] = {
+            type: "Tokens Supplied",
             blockNumber: log.blockNumber,
             timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
             transactionHash: log.transactionHash,
@@ -92,5 +89,5 @@ export const fetchEvents = async (setEvents) => {
     }
 
     setEvents(newEvents)
-    return Promise.all([redemptionsEvents, grantUpdatedEvents, grantCreatedEvents])
+    return Promise.all([redemptionsEvents, grantCreatedEvents, grantCancelledEvents, supplyEvents])
 }
