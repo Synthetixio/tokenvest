@@ -7,7 +7,7 @@ import { accountDisplay } from '../../../../lib/utils/helpers'
 import { useRecoilState } from 'recoil'
 import { getGrants } from '../../../../lib/store/grants'
 import GrantModal from './GrantModal'
-import BurnButton from './BurnButton'
+import CancelButton from './CancelButton'
 
 export default function Grants() {
   const [grants, setGrants] = useRecoilState(getGrants());
@@ -62,8 +62,12 @@ export default function Grants() {
                   <Text fontSize="xs" opacity={0.8}>of {parseInt(ethers.utils.formatUnits(grant.totalAmount, 18)).toLocaleString()} {grant.tokenSymbol} total</Text>
                 </Td>
                 <Td>
-                  <GrantModal grant={grant} />
-                  <BurnButton tokenId={grant.tokenId} />
+                  {grant.cancelled ? <Text fontSize="xs" opacity={0.8}>Cancelled</Text> :
+                    <div>
+                      <GrantModal grant={grant} />
+                      <CancelButton tokenId={grant.tokenId} />
+                    </div>
+                  }
                 </Td>
               </Tr>
             )
