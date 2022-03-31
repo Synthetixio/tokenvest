@@ -23,7 +23,7 @@ export default function UserGrants() {
   }, [])
 
   return loadingData ? <Spinner d="block" mx="auto" my={6} /> :
-    (grants.length ? grants.map((grant, ind) => {
+    (grants.length ? [...grants].reverse().map((grant, ind) => {
       return (<Box key={ind} mb={12}>
         <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId.toNumber()}</Text>
         <GrantStatus tokenId={grant.tokenId.toNumber()} cancelled={grant.cancelled} />
