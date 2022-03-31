@@ -71,9 +71,10 @@ export default function CancelButton({ tokenId }) {
     try {
       await vesterContract.cancelGrant(tokenId)
     } catch (err) {
+      console.log(err)
       toast({
         title: "Error",
-        description: err.data.message,
+        description: err?.data?.message || err,
         status: "error",
         isClosable: true,
       });

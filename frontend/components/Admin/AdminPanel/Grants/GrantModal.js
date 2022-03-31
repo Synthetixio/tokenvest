@@ -186,9 +186,10 @@ export default function GrantModal({ grant }) {
         await vesterContract.mint(...args)
       }
     } catch (err) {
+      console.log(err)
       toast({
         title: "Error",
-        description: err.data.message,
+        description: err?.data?.message || err,
         status: "error",
         isClosable: true,
       });

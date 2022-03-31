@@ -7,7 +7,7 @@ import { useRecoilState } from 'recoil'
 import { getGrant, redeemGrant } from '../../../lib/store/grants'
 import { getEventsByTokenId } from '../../../lib/store/events'
 
-export default function ReedemTokens({ tokenId }) {
+export default function RedeemTokens({ tokenId }) {
   const [grant, setGrant] = useRecoilState(getGrant(tokenId));
   const [events, setEvents] = useRecoilState(getEventsByTokenId(tokenId));
 
