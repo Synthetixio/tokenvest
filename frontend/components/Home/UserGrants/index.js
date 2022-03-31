@@ -26,7 +26,7 @@ export default function UserGrants() {
     (grants.length ? grants.map((grant, ind) => {
       return (<Box key={ind} mb={12}>
         <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId.toNumber()}</Text>
-        <GrantStatus tokenId={grant.tokenId.toNumber()} />
+        <GrantStatus tokenId={grant.tokenId.toNumber()} cancelled={grant.cancelled} />
         <RedeemTokens tokenId={grant.tokenId.toNumber()} />
         <RecentActivity tokenId={grant.tokenId.toNumber()} />
         <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Each grant is an NFT at the contract address <Link

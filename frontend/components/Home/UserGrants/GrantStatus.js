@@ -6,7 +6,7 @@ import { useRecoilState } from 'recoil'
 import { format, formatDistanceToNowStrict, formatDistance } from 'date-fns'
 import { getGrant } from '../../../lib/store/grants'
 
-export default function GrantStatus({ tokenId }) {
+export default function GrantStatus({ tokenId, cancelled }) {
   const [grant] = useRecoilState(getGrant(tokenId));
 
   const amountVested = parseFloat(ethers.utils.formatUnits(grant.amountVested, 18));
@@ -24,6 +24,16 @@ export default function GrantStatus({ tokenId }) {
   );
   const intervalInWords = formatDistance(new Date(0), new Date(vestInterval * 1000))
 
+  const descriptionText = <div>{
+    cliffTimestamp > Date.now() / 1000 ?
+      <>Your grant will vest {vestAmount.toLocaleString()} {grant.tokenSymbol} every {intervalInWords} with a cliff on {format(new Date(cliffTimestamp * 1000), 'M/dd/yyyy')}.</>
+      :
+      amountVested == totalAmount ?
+        <Text>Your grant has completely vested.</Text>
+        :
+        <Text>Your grant vests every {intervalInWords}. Your next {vestAmount.toLocaleString()} {grant.tokenSymbol} will vest in {nextVest}.</Text>
+  } </div>
+
   return (
     <Box
       mb={5}
@@ -34,14 +44,7 @@ export default function GrantStatus({ tokenId }) {
       <Heading size="lg" fontWeight="light"><Icon as={BsClockHistory} boxSize={5} mr={2} />Grant Status</Heading>
       <Flex align="center">
         <Box width="50%" pr={4}>
-          {cliffTimestamp > Date.now() / 1000 ?
-            <>Your grant will vest {vestAmount.toLocaleString()} {grant.tokenSymbol} every {intervalInWords} with a cliff on {format(new Date(cliffTimestamp * 1000), 'M/dd/yyyy')}.</>
-            :
-            amountVested == totalAmount ?
-              <Text>Your grant has completely vested.</Text>
-              :
-              <Text>Your grant vests every {intervalInWords}. Your next {vestAmount.toLocaleString()} {grant.tokenSymbol} will vest in {nextVest}.</Text>
-          }
+          {!cancelled ? descriptionText : <Text>Cancelled.</Text>}
         </Box>
         <Box width="50%">
           <Heading size="md" fontWeight="medium" mb={1}>{(amountVested / totalAmount * 100).toLocaleString()}% Vested</Heading>
