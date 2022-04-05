@@ -50,20 +50,10 @@ export default function RecentActivity({ tokenId }) {
           </Flex>
 
           {event.type == "Redemption" && <Text fontSize="lg" mt={-1.5}>{parseFloat(ethers.utils.formatUnits(event.amount, 18)).toLocaleString()} {event.tokenSymbol} redeemed by {event.redeemerAddress}.</Text>}
-          {event.type == "Grant Updated" && <Flex>
+          {event.type == "Grant Cancelled" && <Flex>
             <Box>
-              <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8} mb={0.5}>Start Date</Text>
-              <Text>{format(new Date(event.startTimestamp.toNumber() * 1000), 'PPP')} <Text d="inline" fontSize="xs" opacity={0.8}>{format(new Date(event.cliffTimestamp.toNumber() * 1000), 'M/d/yy')} cliff</Text></Text>
-            </Box>
-            <Spacer />
-            <Box>
-              <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8} mb={0.5}>Vesting schedule</Text>
-              <Text>{parseInt(ethers.utils.formatUnits(event.vestAmount, 18)).toLocaleString()} {event.tokenSymbol} every {formatDistance(new Date(0), new Date(event.vestInterval * 1000))}</Text>
-            </Box>
-            <Spacer />
-            <Box>
-              <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8} mb={0.5}>Amount Redeemed</Text>
-              <Text>{parseInt(ethers.utils.formatUnits(event.amountRedeemed, 18)).toLocaleString()} {event.tokenSymbol} of {parseInt(ethers.utils.formatUnits(event.totalAmount, 18)).toLocaleString()} {event.tokenSymbol}</Text>
+              <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8} mb={0.5}>Cancelled tokenId</Text>
+              <Text>{parseInt(event.tokenId.toNumber())}</Text>
             </Box>
           </Flex>}
 

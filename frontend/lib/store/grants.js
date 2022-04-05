@@ -152,3 +152,33 @@ export const redeemGrant = async (tokenId, exchangeTokenAmount, exchangeTokenAdd
             .catch(errorToastEvent)
     }
 }
+
+export const redeemAll = async () => {
+    const provider = new ethers.providers.Web3Provider(window?.ethereum) //or should this be passed in?
+    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
+
+    const submitToastEvent = () => {
+        toast({
+            title: 'RedeemAll Submitted',
+            description: 'Refer to your wallet for the latest status, and refresh page for updated data.',
+            status: 'info',
+            position: 'top',
+            duration: 10000,
+            isClosable: true,
+        })
+    }
+
+    const errorToastEvent = (error) => {
+        toast({
+            title: 'Error',
+            description: parseErrorMessage(error),
+            status: 'error',
+            position: 'top',
+            isClosable: true,
+        })
+    }
+
+    return await vesterContract.connect(provider.getSigner()).redeemAll()
+        .then(submitToastEvent)
+        .catch(errorToastEvent)
+}

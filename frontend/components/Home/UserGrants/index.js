@@ -3,6 +3,7 @@ import { Box, Text, Spinner, Link } from '@chakra-ui/react'
 import { InfoOutlineIcon } from '@chakra-ui/icons'
 import GrantStatus from './GrantStatus'
 import RedeemTokens from './RedeemTokens'
+import RedeemAll from './RedeemAll'
 import RecentActivity from '../../shared/RecentActivity'
 import { useRecoilState } from 'recoil'
 import { getGrantsByUser, fetchGrants } from '../../../lib/store/grants'
@@ -22,22 +23,31 @@ export default function UserGrants() {
     })
   }, [])
 
+  const makeGrantElement = (grant, ind) => {
+    return (<Box key={ind} mb={12}>
+      <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId.toNumber()}</Text>
+      <GrantStatus tokenId={grant.tokenId.toNumber()} cancelled={grant.cancelled} />
+      {grant.cancelled ? "" : <RedeemTokens tokenId={grant.tokenId.toNumber()} />}
+      <RecentActivity tokenId={grant.tokenId.toNumber()} />
+      <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Each grant is an NFT at the contract address <Link
+        d="inline"
+        borderBottom="1px rgba(255,255,255,0.66) dotted"
+        borderRadius={1}
+        _hover={{
+          textDecoration: "none",
+          borderBottom: "1px rgba(255,255,255,0.9) dotted",
+        }} href={`https://etherscan.io/token/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</Link></Text>
+    </Box>)
+  }
+
+  const noGrantsText = <Text textAlign="center" py={16} fontWeight="thin" fontSize="3xl" letterSpacing={1.5}>There are no grants associated with this wallet.</Text>
+
+  const numNonZeroAvailable = grants.length ? grants.filter(g => g.amountAvailable.gt(0)).length : 0;
+
   return loadingData ? <Spinner d="block" mx="auto" my={6} /> :
-    (grants.length ? grants.map((grant, ind) => {
-      return (<Box key={ind} mb={12}>
-        <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId.toNumber()}</Text>
-        <GrantStatus tokenId={grant.tokenId.toNumber()} />
-        <RedeemTokens tokenId={grant.tokenId.toNumber()} />
-        <RecentActivity tokenId={grant.tokenId.toNumber()} />
-        <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Each grant is an NFT at the contract address <Link
-          d="inline"
-          borderBottom="1px rgba(255,255,255,0.66) dotted"
-          borderRadius={1}
-          _hover={{
-            textDecoration: "none",
-            borderBottom: "1px rgba(255,255,255,0.9) dotted",
-          }} href={`https://etherscan.io/token/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</Link></Text>
-      </Box>)
-    }) : <Text textAlign="center" py={16} fontWeight="thin" fontSize="3xl" letterSpacing={1.5}>There are no grants associated with this wallet.</Text>)
+    (grants.length ? <div>
+      {numNonZeroAvailable > 1 ? <RedeemAll /> : ""}
+      {[...grants].reverse().map(makeGrantElement)}
+    </div> : noGrantsText)
 
 }

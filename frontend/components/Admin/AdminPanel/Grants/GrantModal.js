@@ -82,11 +82,11 @@ export default function GrantModal({ grant }) {
     }
 
     const vesterInterface = new ethers.utils.Interface([
-      "function updateGrant(uint tokenId, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval)",
+      "function replaceGrant(uint tokenId, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval)",
       "function mint(address granteeAddress, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval)",
     ]);
 
-    const data = grant ? vesterInterface.encodeFunctionData("updateGrant", [
+    const data = grant ? vesterInterface.encodeFunctionData("replaceGrant", [
       grant.tokenId,
       checksummedTokenAddress,
       startTimestamp,
@@ -181,14 +181,15 @@ export default function GrantModal({ grant }) {
 
     try {
       if (grant) {
-        await vesterContract.updateGrant(...args)
+        await vesterContract.replaceGrant(...args)
       } else {
         await vesterContract.mint(...args)
       }
     } catch (err) {
+      console.log(err)
       toast({
         title: "Error",
-        description: err.data.message,
+        description: err?.data?.message || err,
         status: "error",
         isClosable: true,
       });
@@ -217,7 +218,7 @@ export default function GrantModal({ grant }) {
       <ModalContent>
         <ModalHeader>
           {grant ?
-            `Update Grant #${grant.tokenId}` :
+            `Replace Grant #${grant.tokenId}` :
             "Create Grant"
           }
         </ModalHeader>
