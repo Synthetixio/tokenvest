@@ -19,12 +19,12 @@ export default function RecentActivity({ tokenId }) {
       <Heading size="lg" fontWeight="light"><Icon as={BsCalendarWeek} boxSize={5} mr={2} />Recent Activity</Heading>
       {events.length ? events.slice().sort((a, b) => (b.blockNumber - a.blockNumber)).map((event, ind) => {
         return (<Box borderBottom={ind + 1 != events.length && "1px solid rgba(255,255,255,0.1)"} py={4} key={ind}>
-          <Flex w="100%" mb={3}>
+          <Flex w="100%">
             <Heading d="inline" size="md" fontWeight="medium">
               {event.type}
             </Heading>
             <Box ml="auto" transform="translateY(-2px)">
-              {tokenId == undefined &&
+              {tokenId == undefined && event.tokenId &&
                 <Text
                   d="inline-block"
                   mr={4}
@@ -49,13 +49,7 @@ export default function RecentActivity({ tokenId }) {
             </Box>
           </Flex>
 
-          {event.type == "Redemption" && <Text fontSize="lg" mt={-1.5}>{parseFloat(ethers.utils.formatUnits(event.amount, 18)).toLocaleString()} {event.tokenSymbol} redeemed by {event.redeemerAddress}.</Text>}
-          {event.type == "Grant Cancelled" && <Flex>
-            <Box>
-              <Text fontSize='xs' lineHeight={1} textTransform="uppercase" letterSpacing={1.5} opacity={0.8} mb={0.5}>Cancelled tokenId</Text>
-              <Text>{parseInt(event.tokenId.toNumber())}</Text>
-            </Box>
-          </Flex>}
+          {event.type == "Redemption" && <Text fontSize="lg" mt={2}>{parseFloat(ethers.utils.formatUnits(event.amount, 18)).toLocaleString()} {event.tokenSymbol} redeemed by {event.redeemerAddress}.</Text>}
 
         </Box>)
       }) : (<Text textAlign="center" mt={6} pb={6}>
