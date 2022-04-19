@@ -1,4 +1,5 @@
-import { Heading, Box, Table, Thead, Tbody, Tr, Th, Td, Link, Button, Text, Flex, useDisclosure } from '@chakra-ui/react'
+import { useState } from 'react'
+import { Heading, Box, Table, Thead, Tbody, Tr, Th, Td, Link, Text, Flex, Checkbox } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
 import { format, formatDistance } from 'date-fns'
@@ -11,6 +12,7 @@ import CancelButton from './CancelButton'
 
 export default function Grants() {
   const [grants, setGrants] = useRecoilState(getGrants());
+  const [showCancelled, setShowCancelled] = useState(false)
 
   return (
     <Box
@@ -37,7 +39,7 @@ export default function Grants() {
         <Tbody>
           {grants.map((grant, ind) => {
             return (
-              <Tr key={ind}>
+              <Tr key={ind} d={!showCancelled && grant.cancelled && 'none'}>
                 <Td>#{grant.tokenId.toNumber()}</Td>
                 <Td>
                   <Link
@@ -74,6 +76,10 @@ export default function Grants() {
           })}
         </Tbody>
       </Table>
+      <Checkbox
+        mt="3"
+        isChecked={showCancelled}
+        onChange={(e) => setShowCancelled(!showCancelled)}>Show cancelled grants</Checkbox>
     </Box >
   )
 }
