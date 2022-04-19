@@ -14,8 +14,11 @@ import {
   FormHelperText,
   Input,
   LightMode,
-  SimpleGrid
+  SimpleGrid,
+  InputGroup,
+  InputRightAddon
 } from '@chakra-ui/react'
+import { format } from 'date-fns'
 import { EditIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
 import SafeBatchSubmitter from "../../../../lib/utils/SafeBatchSubmitter.js";
@@ -208,6 +211,10 @@ export default function GrantModal({ grant }) {
 
   }
 
+  function displayTime(input) {
+    return format(new Date(input * 1000), 'MMM. d ’yy, p')
+  }
+
   return (<>
     {grant ?
       <EditIcon onClick={openHandler} cursor="pointer" boxSize={4} mr={2} /> :
@@ -239,13 +246,19 @@ export default function GrantModal({ grant }) {
 
           <FormControl mb={5}>
             <FormLabel htmlFor='startTimestamp'>Start Timestamp</FormLabel>
-            <Input value={startTimestamp} onChange={(e) => setStartTimestamp(e.target.value)} id='startTimestamp' type="number" />
+            <InputGroup>
+              <Input value={startTimestamp} onChange={(e) => setStartTimestamp(e.target.value)} id='startTimestamp' type="number" />
+              {startTimestamp > 0 && <InputRightAddon children={displayTime(startTimestamp)} />}
+            </InputGroup>
             <FormHelperText>This is the time at which the the grant begins to vest. The current timestamp is {Math.floor(Date.now() / 1000)}.</FormHelperText>
           </FormControl>
 
           <FormControl mb={5}>
             <FormLabel htmlFor='cliffTimestamp'>Cliff Timestamp</FormLabel>
-            <Input value={cliffTimestamp} onChange={(e) => setCliffTimestamp(e.target.value)} id='cliffTimestamp' type="number" />
+            <InputGroup>
+              <Input value={cliffTimestamp} onChange={(e) => setCliffTimestamp(e.target.value)} id='cliffTimestamp' type="number" />
+              {cliffTimestamp > 0 && <InputRightAddon children={displayTime(cliffTimestamp)} />}
+            </InputGroup>
             <FormHelperText>This is the time before which no tokens may be redeemed. The timestamp six months from now is {Math.floor(Date.now() / 1000) + (7889400 * 2)}.</FormHelperText>
           </FormControl>
 
