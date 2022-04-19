@@ -16,12 +16,22 @@ export default function GrantStatus({ tokenId, cancelled }) {
   const cliffTimestamp = parseInt(grant.cliffTimestamp);
   const vestInterval = parseInt(grant.vestInterval);
 
+  const currentTime = new Date().getTime() / 1000;
+  let nextIntervalVest = 0;
+  if (vestInterval > 0 && startTimestamp < currentTime) {
+    nextIntervalVest = startTimestamp;
+    while (nextIntervalVest < currentTime) {
+      nextIntervalVest += vestInterval;
+    }
+  }
+
   const nextVest = formatDistanceToNowStrict(
     new Date(Math.max(
       cliffTimestamp * 1000,
-      vestInterval * 1000
+      nextIntervalVest * 1000
     ))
   );
+
   const intervalInWords = formatDistance(new Date(0), new Date(vestInterval * 1000))
 
   const descriptionText = <div>{
