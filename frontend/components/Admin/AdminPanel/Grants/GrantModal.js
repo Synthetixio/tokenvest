@@ -248,7 +248,7 @@ export default function GrantModal({ grant }) {
             <FormLabel htmlFor='startTimestamp'>Start Timestamp</FormLabel>
             <InputGroup>
               <Input value={startTimestamp} onChange={(e) => setStartTimestamp(e.target.value)} id='startTimestamp' type="number" />
-              {startTimestamp > 0 && <InputRightAddon children={displayTime(startTimestamp)} />}
+              {startTimestamp > 0 && <InputRightAddon>{displayTime(startTimestamp)}</InputRightAddon>}
             </InputGroup>
             <FormHelperText>This is the time at which the the grant begins to vest. The current timestamp is {Math.floor(Date.now() / 1000)}.</FormHelperText>
           </FormControl>
@@ -257,7 +257,7 @@ export default function GrantModal({ grant }) {
             <FormLabel htmlFor='cliffTimestamp'>Cliff Timestamp</FormLabel>
             <InputGroup>
               <Input value={cliffTimestamp} onChange={(e) => setCliffTimestamp(e.target.value)} id='cliffTimestamp' type="number" />
-              {cliffTimestamp > 0 && <InputRightAddon children={displayTime(cliffTimestamp)} />}
+              {cliffTimestamp > 0 && <InputRightAddon>{displayTime(cliffTimestamp)}</InputRightAddon>}
             </InputGroup>
             <FormHelperText>This is the time before which no tokens may be redeemed. The timestamp six months from now is {Math.floor(Date.now() / 1000) + (7889400 * 2)}.</FormHelperText>
           </FormControl>
