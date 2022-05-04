@@ -4,6 +4,7 @@ import { Icon } from '@chakra-ui/icons'
 import { BsCashStack } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import SafeBatchSubmitter from "../../../lib/utils/SafeBatchSubmitter.js";
+import EtherscanLink from '../../shared/EtherscanLink'
 
 export default function TokenBalance() {
   const toast = useToast();
@@ -100,14 +101,14 @@ export default function TokenBalance() {
       py={5}
       px={6}>
       <Heading size="lg" fontWeight="light"><Icon as={BsCashStack} boxSize={5} mr={2} />Token Balances</Heading>
-      <Text fontSize="sm" my="2">Grant recipients can redeem their tokens from <Link
+      <Text fontSize="sm" my="2">Grant recipients can redeem their tokens from <EtherscanLink
         d="inline"
         borderBottom="1px rgba(255,255,255,0.66) dotted"
         borderRadius={1}
         _hover={{
           textDecoration: "none",
           borderBottom: "1px rgba(255,255,255,0.9) dotted",
-        }} href={`https://${chainId == 10 ? 'optimistic.' : ''}etherscan.io/address/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</Link>.</Text>
+        }} path={`/address/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</EtherscanLink>.</Text>
       {chainId == 1 && (loadingData ?
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :
         (tokenData && tokenData.length ?

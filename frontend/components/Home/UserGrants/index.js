@@ -5,6 +5,7 @@ import GrantStatus from './GrantStatus'
 import RedeemTokens from './RedeemTokens'
 import RedeemAll from './RedeemAll'
 import RecentActivity from '../../shared/RecentActivity'
+import EtherscanLink from '../../shared/EtherscanLink'
 import { useRecoilState } from 'recoil'
 import { getGrantsByUser, fetchGrants } from '../../../lib/store/grants'
 import { eventsState, fetchEvents } from '../../../lib/store/events'
@@ -29,14 +30,14 @@ export default function UserGrants() {
       <GrantStatus tokenId={grant.tokenId.toNumber()} cancelled={grant.cancelled} />
       {grant.cancelled ? "" : <RedeemTokens tokenId={grant.tokenId.toNumber()} />}
       <RecentActivity tokenId={grant.tokenId.toNumber()} />
-      <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Each grant is an NFT at the contract address <Link
+      <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Each grant is an NFT at the contract address <EtherscanLink
         d="inline"
         borderBottom="1px rgba(255,255,255,0.66) dotted"
         borderRadius={1}
         _hover={{
           textDecoration: "none",
           borderBottom: "1px rgba(255,255,255,0.9) dotted",
-        }} href={`https://etherscan.io/token/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</Link></Text>
+        }} path={`/token/${process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS}</EtherscanLink></Text>
     </Box>)
   }
 

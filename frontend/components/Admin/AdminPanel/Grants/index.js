@@ -7,6 +7,7 @@ import { BsAward } from 'react-icons/bs'
 import { accountDisplay } from '../../../../lib/utils/helpers'
 import { useRecoilState } from 'recoil'
 import { getGrants } from '../../../../lib/store/grants'
+import EtherscanLink from '../../../shared/EtherscanLink'
 import GrantModal from './GrantModal'
 import CancelButton from './CancelButton'
 
@@ -42,14 +43,14 @@ export default function Grants() {
               <Tr key={ind} d={!showCancelled && grant.cancelled && 'none'}>
                 <Td>#{grant.tokenId.toNumber()}</Td>
                 <Td>
-                  <Link
+                  <EtherscanLink
                     borderBottom="1px rgba(255,255,255,0.66) dotted"
                     borderRadius={1}
                     lineHeight={1.2}
                     _hover={{
                       textDecoration: "none",
                       borderBottom: "1px rgba(255,255,255,0.9) dotted",
-                    }} isExternal href={`https://etherscan.io/address/${grant.owner}`}>{accountDisplay(grant.owner)}</Link>
+                    }} isExternal path={`/address/${grant.owner}`}>{accountDisplay(grant.owner)}</EtherscanLink>
                 </Td>
                 <Td>
                   <Text>{format(new Date(grant.startTimestamp.toNumber() * 1000), 'MMM. d ’yy')} start</Text>
