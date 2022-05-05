@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react'
-import { Heading, Box, Text, Spinner, Table, Thead, Tbody, Tr, Th, Td, Button, useToast, Link, LightMode } from '@chakra-ui/react'
+import { Heading, Box, Text, Spinner, Table, Thead, Tbody, Tr, Th, Td, Button, useToast, Link, LightMode, StatGroup, Stat, StatLabel, StatNumber } from '@chakra-ui/react'
 import { Icon } from '@chakra-ui/icons'
 import { BsCashStack } from 'react-icons/bs'
 import { ethers } from 'ethers'
 import SafeBatchSubmitter from "../../../lib/utils/SafeBatchSubmitter.js";
 import EtherscanLink from '../../shared/EtherscanLink'
+import { useRecoilState } from 'recoil'
+import { getGrants } from '../../../lib/store/grants'
+import erc20Abi from '../../../abis/SampleToken.json'
 
 export default function TokenBalance() {
   const toast = useToast();
 
+  const [grants, setGrants] = useRecoilState(getGrants());
   const [loadingData, setLoadingData] = useState(false);
   const [tokenData, setTokenData] = useState({})
   const [chainId, setChainId] = useState(null)
+  const [availableTokens, setAvailableTokens] = useState(0)
 
   const contractAddress = process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS
 
@@ -25,6 +30,19 @@ export default function TokenBalance() {
       setChainId(resp.chainId)
     })();
   }, [])
+
+  useEffect(() => {
+    (async function () {
+      // We assume all grants use the same token address
+      if (grants.length) {
+        const provider = new ethers.providers.Web3Provider(window?.ethereum)
+        const tokenAddress = grants[0].tokenAddress
+        const erc20Contract = new ethers.Contract(tokenAddress, erc20Abi.abi, provider); // should be provider.getSigner() ?
+        const tokenBalance = await erc20Contract.balanceOf(contractAddress);
+        setAvailableTokens(parseFloat(ethers.utils.formatUnits((tokenBalance), 18)))
+      }
+    })();
+  }, [grants]);
 
   const loadData = async () => {
     setLoadingData(true)
@@ -93,6 +111,15 @@ export default function TokenBalance() {
     }
   }
 
+  const activeGrants = grants.filter(grant => !grant.cancelled);
+  const stats = {
+    granted: parseFloat(ethers.utils.formatUnits(activeGrants.reduce((acc, grant) => acc.add(grant.totalAmount), ethers.BigNumber.from(0)), 18)),
+    vested: parseFloat(ethers.utils.formatUnits(activeGrants.reduce((acc, grant) => acc.add(grant.amountVested), ethers.BigNumber.from(0)), 18)),
+    redeemed: parseFloat(ethers.utils.formatUnits(activeGrants.reduce((acc, grant) => acc.add(grant.amountRedeemed), ethers.BigNumber.from(0)), 18)),
+    redeemable: parseFloat(ethers.utils.formatUnits(activeGrants.reduce((acc, grant) => acc.add(grant.amountAvailable), ethers.BigNumber.from(0)), 18)),
+    available: availableTokens
+  }
+
   return (
     <Box
       mb={8}
@@ -101,7 +128,7 @@ export default function TokenBalance() {
       py={5}
       px={6}>
       <Heading size="lg" fontWeight="light"><Icon as={BsCashStack} boxSize={5} mr={2} />Token Balances</Heading>
-      <Text fontSize="sm" my="2">Grant recipients can redeem their tokens from <EtherscanLink
+      <Text fontSize="sm" mt="2" mb="4">Grant recipients can redeem their tokens from <EtherscanLink
         d="inline"
         borderBottom="1px rgba(255,255,255,0.66) dotted"
         borderRadius={1}
@@ -112,7 +139,7 @@ export default function TokenBalance() {
       {chainId == 1 && (loadingData ?
         <Spinner d="block" mx="auto" mt={12} mb={8} /> :
         (tokenData && tokenData.length ?
-          <Table size="sm" variant='simple' my={3}>
+          <Table size="sm" variant='simple' mb={3}>
             <Thead>
               <Tr>
                 <Th>Token</Th>
@@ -142,6 +169,29 @@ export default function TokenBalance() {
           </Table>
           : <Text mt={16} mb={14} textAlign="center" opacity={0.8}>No tokens balances found</Text>)
       )}
+      <StatGroup>
+        <Stat mb="3">
+          <StatLabel>Granted</StatLabel>
+          <StatNumber>{stats.granted.toLocaleString()}</StatNumber>
+        </Stat>
+        <Stat>
+          <StatLabel>Vested</StatLabel>
+          <StatNumber>{stats.vested.toLocaleString()}</StatNumber>
+        </Stat>
+        <Stat>
+          <StatLabel>Redeemed</StatLabel>
+          <StatNumber>{stats.redeemed.toLocaleString()}</StatNumber>
+        </Stat>
+        <Stat>
+          <StatLabel>Redeemable</StatLabel>
+          <StatNumber>{stats.redeemable.toLocaleString()}</StatNumber>
+        </Stat>
+        <Stat>
+          <StatLabel>Available</StatLabel>
+          <StatNumber>{stats.available.toLocaleString()}</StatNumber>
+        </Stat>
+      </StatGroup>
+
       {chainId == 1 &&
         <Text fontSize="xs" textAlign="center" opacity={0.8}>Token balances provided by <Link
           d="inline"
