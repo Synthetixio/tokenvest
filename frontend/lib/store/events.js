@@ -34,7 +34,7 @@ export const getEventsByTokenId = selectorFamily({
 /**** ACTIONS ****/
 
 export const fetchEvents = async (setEvents) => {
-    const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID })
+    const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
     let newEvents = {}

@@ -23,7 +23,7 @@ export default function TokenBalance() {
 
   useEffect(() => {
     (async function () {
-      const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID })
+      const provider = new ethers.providers.Web3Provider(window?.ethereum)
       const resp = await provider.getNetwork()
       if (resp.chainId == 1) {
         loadData()
@@ -34,7 +34,7 @@ export default function TokenBalance() {
 
   useEffect(() => {
     (async function () {
-      const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID })
+      const provider = new ethers.providers.Web3Provider(window?.ethereum)
       let newStats = [];
       const groupedGrants = groupBy(grants.filter(grant => !grant.cancelled), 'tokenAddress');
       for (let grantGroup of Object.values(groupedGrants)) {
@@ -66,7 +66,7 @@ export default function TokenBalance() {
   }
 
   async function generateSafeBatchSubmitter() {
-    const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID });
+    const provider = new ethers.providers.Web3Provider(window?.ethereum);
     let signer = provider.getSigner();
     signer.address = await signer.getAddress();
     let network = await provider.getNetwork();

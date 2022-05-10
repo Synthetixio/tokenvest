@@ -56,7 +56,7 @@ export const getGrantsByUser = selectorFamily({
 /**** ACTIONS ****/
 
 export const fetchGrant = async (setGrant, tokenId) => {
-    const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID })
+    const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
     const grantData = await vesterContract.grants(tokenId)
@@ -80,7 +80,7 @@ export const fetchGrant = async (setGrant, tokenId) => {
 }
 
 export const fetchGrants = async (setGrant) => {
-    const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID })
+    const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
     let promises = []
 
@@ -94,7 +94,7 @@ export const fetchGrants = async (setGrant) => {
 }
 
 export const redeemGrant = async (tokenId, exchangeTokenAmount, exchangeTokenAddress, setGrant, setEvents) => {
-    const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID }) //or should this be passed in?
+    const provider = new ethers.providers.Web3Provider(window?.ethereum) //or should this be passed in?
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
     const submitToastEvent = () => {
@@ -154,7 +154,7 @@ export const redeemGrant = async (tokenId, exchangeTokenAmount, exchangeTokenAdd
 }
 
 export const redeemAll = async () => {
-    const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID }) //or should this be passed in?
+    const provider = new ethers.providers.Web3Provider(window?.ethereum) //or should this be passed in?
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
     const submitToastEvent = () => {

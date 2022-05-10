@@ -11,7 +11,7 @@ export default function CancelButton({ tokenId }) {
   const contractAddress = process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS
 
   async function generateSafeBatchSubmitter() {
-    const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID });
+    const provider = new ethers.providers.Web3Provider(window?.ethereum);
     let signer = provider.getSigner();
     signer.address = await signer.getAddress();
     let network = await provider.getNetwork();
@@ -64,7 +64,7 @@ export default function CancelButton({ tokenId }) {
   }
 
   const executeCancel = async () => {
-    const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID })
+    const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const signer = provider.getSigner();
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, signer);
 
