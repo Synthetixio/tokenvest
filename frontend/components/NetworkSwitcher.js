@@ -8,7 +8,7 @@ const NetworkSwitcher = () => {
 
   useEffect(() => {
     (async function () {
-      const provider = new ethers.providers.Web3Provider(window?.ethereum)
+      const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID })
       const resp = await provider.getNetwork()
       if (resp.chainId == 1) {
         setChainId("0x1");

@@ -53,7 +53,7 @@ export default function GrantModal({ grant }) {
   }
 
   async function generateSafeBatchSubmitter() {
-    const provider = new ethers.providers.Web3Provider(window?.ethereum);
+    const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID });
     let signer = provider.getSigner();
     signer.address = await signer.getAddress();
     let network = await provider.getNetwork();
@@ -142,7 +142,7 @@ export default function GrantModal({ grant }) {
 
   const executeTransaction = async () => {
 
-    const provider = new ethers.providers.Web3Provider(window?.ethereum)
+    const provider = new ethers.getDefaultProvider({ infura: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID })
     const signer = provider.getSigner();
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, signer);
 
