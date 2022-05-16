@@ -16,7 +16,7 @@ export default function EtherscanLink(props) {
 
     let newProps = clone(props)
     newProps.path = undefined;
-    const href = `https://${chainId == 10 ? 'optimism' : ''}.etherscan.io${props.path}`;
+    const href = `https://${chainId == 10 ? 'optimistic' : ''}.etherscan.io${props.path}`;
 
     return <Link {...newProps} href={href} />
 }
