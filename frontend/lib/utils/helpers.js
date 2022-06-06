@@ -20,3 +20,7 @@ export const parseErrorMessage = (error) => {
     }
     return message
 }
+
+export const getSafeTransactionServiceUrl = (network) => {
+    return `https://safe-transaction${network !== 'mainnet' ? `.${network}` : ''}.gnosis.io`;
+}

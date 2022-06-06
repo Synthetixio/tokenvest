@@ -1,9 +1,10 @@
 'use strict';
 
 const ethers = require('ethers');
-const { EthersAdapter } = require('@gnosis.pm/safe-core-sdk');
+const EthersAdapter = require('@gnosis.pm/safe-ethers-lib').default;
 const GnosisSafe = require('@gnosis.pm/safe-core-sdk').default;
 const SafeServiceClient = require('@gnosis.pm/safe-service-client').default;
+const getSafeTransactionServiceUrl = require('./helpers').getSafeTransactionServiceUrl;
 
 class SafeBatchSubmitter {
     constructor({ network, signer, safeAddress }) {
@@ -16,9 +17,11 @@ class SafeBatchSubmitter {
             signer,
         });
 
-        this.service = new SafeServiceClient(
-            `https://safe-transaction${network === 'rinkeby' ? '.rinkeby' : ''}.gnosis.io`
-        );
+        this.service = new SafeServiceClient({
+            txServiceUrl: getSafeTransactionServiceUrl(network),
+            ethAdapter: this.ethAdapter
+        });
+
     }
 
     async init() {
