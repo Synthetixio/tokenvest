@@ -3,7 +3,6 @@ import { Heading, Box, Text, Spinner, Table, Thead, Tbody, Tr, Th, Td, Button, u
 import { Icon } from '@chakra-ui/icons'
 import { BsCashStack } from 'react-icons/bs'
 import { ethers } from 'ethers'
-import SafeBatchSubmitter from "../../../lib/utils/SafeBatchSubmitter.js";
 import EtherscanLink from '../../shared/EtherscanLink'
 import { useRecoilState } from 'recoil'
 import { getGrants } from '../../../lib/store/grants'

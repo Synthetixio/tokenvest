@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Text, Link, Spinner } from '@chakra-ui/react'
-import { InfoOutlineIcon } from '@chakra-ui/icons'
+import { Spinner } from '@chakra-ui/react'
 import Grants from './Grants'
 import TokenBalance from './TokenBalance'
 import RecentActivity from '../../shared/RecentActivity'
 import { useRecoilState } from 'recoil'
 import { getGrants, fetchGrants } from '../../../lib/store/grants'
 import { eventsState, fetchEvents } from '../../../lib/store/events'
-import EtherscanLink from '../../shared/EtherscanLink'
 
 export default function AdminPanel() {
   const [grants, setGrant] = useRecoilState(getGrants());
@@ -24,14 +22,6 @@ export default function AdminPanel() {
     <Grants />
     <TokenBalance />
     <RecentActivity />
-    <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Actions are queued to a Gnosis Safe at <EtherscanLink
-      d="inline"
-      borderBottom="1px rgba(255,255,255,0.66) dotted"
-      borderRadius={1}
-      _hover={{
-        textDecoration: "none",
-        borderBottom: "1px rgba(255,255,255,0.9) dotted",
-      }} path={`/address/${process.env.NEXT_PUBLIC_MULTISIG_ADDRESS}`} isExternal>{process.env.NEXT_PUBLIC_MULTISIG_ADDRESS}</EtherscanLink></Text>
   </>
 
 

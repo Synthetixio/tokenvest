@@ -1,13 +1,14 @@
 import { Text } from '@chakra-ui/react'
 import AdminPanel from '../components/Admin/AdminPanel'
-import { useEthers } from '@usedapp/core'
+import { useAccount } from 'wagmi'
 
 export default function Admin() {
-  const { account } = useEthers()
+  const { isSuccess } = useAccount()
+
   return (
     <div>
       <main>
-        {account ? (
+        {isSuccess ? (
           <AdminPanel />
         ) : (
           <Text textAlign="center" py={16} fontWeight="thin" fontSize="3xl" letterSpacing={1.5}>Connect your wallet to manage grants.</Text>

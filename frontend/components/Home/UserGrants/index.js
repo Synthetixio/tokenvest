@@ -9,12 +9,12 @@ import EtherscanLink from '../../shared/EtherscanLink'
 import { useRecoilState } from 'recoil'
 import { getGrantsByUser, fetchGrants } from '../../../lib/store/grants'
 import { eventsState, fetchEvents } from '../../../lib/store/events'
-import { useEthers } from '@usedapp/core'
+import { useAccount } from 'wagmi'
 
 export default function UserGrants() {
-  const { account } = useEthers()
+  const { data } = useAccount()
 
-  const [grants, setGrant] = useRecoilState(getGrantsByUser(account));
+  const [grants, setGrant] = useRecoilState(getGrantsByUser(data?.address));
   const [events, setEvents] = useRecoilState(eventsState);
   const [loadingData, setLoadingData] = useState(true);
 

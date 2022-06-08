@@ -14,21 +14,20 @@ import {
   FormHelperText,
   Input,
   LightMode,
-  SimpleGrid,
   InputGroup,
   InputRightAddon
 } from '@chakra-ui/react'
 import { format } from 'date-fns'
 import { EditIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
-import SafeBatchSubmitter from "../../../../lib/utils/SafeBatchSubmitter.js";
 import vesterAbi from '../../../../abis/Vester.json'
 import { useToast } from '@chakra-ui/react'
+import { useSigner } from 'wagmi'
 
 export default function GrantModal({ grant }) {
+  const { data: signer } = useSigner()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast();
-  const contractAddress = process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS
 
   const [granteeAddress, setGranteeAddress] = useState('')
   const [tokenAddress, setTokenAddress] = useState('')
@@ -52,98 +51,7 @@ export default function GrantModal({ grant }) {
     onOpen();
   }
 
-  async function generateSafeBatchSubmitter() {
-    const provider = new ethers.providers.Web3Provider(window?.ethereum);
-    let signer = provider.getSigner();
-    signer.address = await signer.getAddress();
-    let network = await provider.getNetwork();
-    const safeBatchSubmitter = new SafeBatchSubmitter({
-      network: network.name,
-      signer,
-      safeAddress: process.env.NEXT_PUBLIC_MULTISIG_ADDRESS,
-    });
-    await safeBatchSubmitter.init();
-    return safeBatchSubmitter;
-  }
-
-  const queueTransaction = async () => {
-
-    let checksummedTokenAddress, checksummedGranteeAddress;
-    try {
-      checksummedTokenAddress = ethers.utils.getAddress(tokenAddress)
-      if (!grant) {
-        checksummedGranteeAddress = ethers.utils.getAddress(granteeAddress)
-      }
-    } catch {
-      toast({
-        title: "Couldn’t Queue Transaction",
-        description: `Make sure all addresses are valid.`,
-        status: "error",
-        isClosable: true,
-      });
-      return
-    }
-
-    const vesterInterface = new ethers.utils.Interface([
-      "function replaceGrant(uint tokenId, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval)",
-      "function mint(address granteeAddress, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval)",
-    ]);
-
-    const data = grant ? vesterInterface.encodeFunctionData("replaceGrant", [
-      grant.tokenId,
-      checksummedTokenAddress,
-      startTimestamp,
-      cliffTimestamp,
-      ethers.utils.parseEther(vestAmount.toString()),
-      ethers.utils.parseEther(totalAmount.toString()),
-      ethers.utils.parseEther(amountRedeemed.toString()),
-      vestInterval,
-    ]) : vesterInterface.encodeFunctionData("mint", [
-      checksummedGranteeAddress,
-      checksummedTokenAddress,
-      startTimestamp,
-      cliffTimestamp,
-      ethers.utils.parseEther(vestAmount.toString()),
-      ethers.utils.parseEther(totalAmount.toString()),
-      ethers.utils.parseEther(amountRedeemed.toString()),
-      vestInterval,
-    ]);
-
-    const safeBatchSubmitter = await generateSafeBatchSubmitter();
-    await safeBatchSubmitter.appendTransaction({
-      to: contractAddress,
-      data,
-      force: false,
-    });
-
-    // Submit transactions
-    try {
-      const submitResult = await safeBatchSubmitter.submit();
-      toast({
-        title: "Transaction Queued",
-        description: submitResult.transactions.length
-          ? `You’ve successfully queued this transaction in the Gnosis Safe.`
-          : "A transaction wasn’t added. It is likely already awaiting execution in the Gnosis Safe.",
-        status: "success",
-        isClosable: true,
-      });
-
-      onClose();
-
-    } catch {
-      toast({
-        title: "Error",
-        description: `Something went wrong when attempting to queue this transaction.`,
-        status: "error",
-        isClosable: true,
-      });
-    }
-  }
-
   const executeTransaction = async () => {
-
-    const provider = new ethers.providers.Web3Provider(window?.ethereum)
-    const signer = provider.getSigner();
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, signer);
 
     let checksummedTokenAddress, checksummedGranteeAddress;
@@ -155,7 +63,7 @@ export default function GrantModal({ grant }) {
     } catch {
       toast({
         title: "Couldn’t Execute Transaction",
-        description: `Make sure any addresses are valid.`,
+        description: `Make sure all addresses are valid.`,
         status: "error",
         isClosable: true,
       });
@@ -192,7 +100,7 @@ export default function GrantModal({ grant }) {
       console.log(err)
       toast({
         title: "Error",
-        description: err?.data?.message || err,
+        description: err?.data?.message || JSON.stringify(err),
         status: "error",
         isClosable: true,
       });
@@ -290,14 +198,9 @@ export default function GrantModal({ grant }) {
 
         <ModalFooter>
           <LightMode>
-            <SimpleGrid columns={2} spacing={6} w="100%">
-              <Button colorScheme='blue' isFullWidth mb={3} onClick={executeTransaction}>
-                Execute Transaction
-              </Button>
-              <Button colorScheme='blue' isFullWidth mb={3} onClick={queueTransaction}>
-                Queue to Multisig
-              </Button>
-            </SimpleGrid>
+            <Button colorScheme='blue' isFullWidth mb={3} onClick={executeTransaction}>
+              Execute Transaction
+            </Button>
           </LightMode>
         </ModalFooter>
       </ModalContent>
