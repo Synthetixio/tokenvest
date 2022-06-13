@@ -3,7 +3,7 @@ import { ChakraProvider, ColorModeScript, Heading, Flex, Container, Box } from '
 import { RecoilRoot } from 'recoil';
 import theme from '../styles/theme'
 import '@rainbow-me/rainbowkit/styles.css';
-
+import { ethers } from 'ethers'
 import {
   getDefaultWallets,
   RainbowKitProvider,
@@ -38,7 +38,17 @@ const wagmiClient = createClient({
   provider
 })
 
+if (typeof window !== "undefined") {
+  const currentProvider = new ethers.providers.Web3Provider(window.ethereum, "any");
+  currentProvider.on("network", (newNetwork, oldNetwork) => {
+    if (oldNetwork) {
+      window.location.reload();
+    }
+  });
+}
+
 function MyApp({ Component, pageProps }) {
+
   return (
     <RecoilRoot>
       <WagmiConfig client={wagmiClient}>
