@@ -36,7 +36,7 @@ export default function GrantStatus({ tokenId, cancelled }) {
 
   const descriptionText = <div>{
     cliffTimestamp > Date.now() / 1000 ?
-      <>Your grant will vest {vestAmount.toLocaleString()} {grant.tokenSymbol} every {intervalInWords} with a cliff on {format(new Date(cliffTimestamp * 1000), 'M/dd/yyyy')}.</>
+      <>Your grant will vest {vestAmount.toLocaleString()} {grant.tokenSymbol} every {intervalInWords} starting {format(new Date(startTimestamp * 1000), 'M/dd/yyyy')} with a cliff on {format(new Date(cliffTimestamp * 1000), 'M/dd/yyyy')}.</>
       :
       amountVested == totalAmount ?
         <Text>Your grant has completely vested.</Text>
@@ -53,10 +53,10 @@ export default function GrantStatus({ tokenId, cancelled }) {
       px={6}>
       <Heading size="lg" fontWeight="light"><Icon as={BsClockHistory} boxSize={5} mr={2} />Grant Status</Heading>
       <Flex align="center">
-        <Box width="50%" pr={4}>
+        <Box width="55%" pr={4}>
           {!cancelled ? descriptionText : <Text>Cancelled.</Text>}
         </Box>
-        <Box width="50%">
+        <Box width="45%">
           <Heading size="md" fontWeight="medium" mb={1}>{(amountVested / totalAmount * 100).toLocaleString()}% Vested</Heading>
           <LightMode>
             <Progress colorScheme='green' size='sm' background="gray.700" borderRadius={8} value={amountVested / totalAmount * 100} />
