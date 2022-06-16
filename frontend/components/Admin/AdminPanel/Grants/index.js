@@ -41,7 +41,7 @@ export default function Grants() {
           {grants.map((grant, ind) => {
             return (
               <Tr key={ind} d={!showCancelled && grant.cancelled && 'none'}>
-                <Td>#{grant.tokenId.toNumber()}</Td>
+                <Td>#{grant.tokenId}</Td>
                 <Td>
                   <EtherscanLink
                     borderBottom="1px rgba(255,255,255,0.66) dotted"

@@ -2,6 +2,7 @@ import { atom, selectorFamily } from "recoil";
 import { ethers } from 'ethers'
 import vesterAbi from '../../abis/Vester.json'
 import erc20Abi from '../../abis/SampleToken.json'
+import multicall3Abi from '../../abis/Multicall3.json'
 import { parseErrorMessage } from '../../lib/utils/helpers'
 import { createStandaloneToast } from '@chakra-ui/react'
 import theme from '../../styles/theme'
@@ -57,45 +58,70 @@ export const getGrantsByUser = selectorFamily({
 
 export const fetchGrant = async (setGrant, tokenId) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
-    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
 
-    const grantData = await vesterContract.grants(tokenId)
-    const amountVested = await vesterContract.amountVested(tokenId)
-    const amountAvailable = await vesterContract.availableForRedemption(tokenId)
-    const owner = await vesterContract.ownerOf(tokenId)
-
-    const erc20Contract = new ethers.Contract(grantData.tokenAddress, erc20Abi.abi, provider); // should be provider.getSigner() ?
+    let vesterInterface = new ethers.utils.Interface(vesterAbi.abi);
+    let multicallArgs = [
+        {
+            target: process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
+            callData: vesterInterface.encodeFunctionData("grants", [tokenId]),
+            allowFailure: true,
+            value: 0,
+        },
+        {
+            target: process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
+            callData: vesterInterface.encodeFunctionData("amountVested", [tokenId]),
+            allowFailure: true,
+            value: 0,
+        },
+        {
+            target: process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
+            callData: vesterInterface.encodeFunctionData("availableForRedemption", [tokenId]),
+            allowFailure: true,
+            value: 0,
+        },
+        {
+            target: process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
+            callData: vesterInterface.encodeFunctionData("ownerOf", [tokenId]),
+            allowFailure: true,
+            value: 0,
+        },
+    ]
+    const multicallContract = new ethers.Contract(process.env.NEXT_PUBLIC_MULTICALL_ADDRESS, multicall3Abi.abi, provider);
+    const resp = await multicallContract.callStatic.aggregate3Value(multicallArgs)
+    const grantData = vesterInterface.decodeFunctionResult("grants", resp[0].returnData)
+    const erc20Contract = new ethers.Contract(grantData.tokenAddress, erc20Abi.abi, provider);
     const tokenSymbol = await erc20Contract.symbol();
 
-    setGrant({
-        tokenId,
-        tokenSymbol,
-        owner,
-        amountVested,
-        amountAvailable,
-        ...grantData
-    })
+    try {
+        setGrant({
+            tokenId,
+            ...grantData,
+            amountVested: vesterInterface.decodeFunctionResult("amountVested", resp[1].returnData)[0],
+            amountAvailable: vesterInterface.decodeFunctionResult("availableForRedemption", resp[2].returnData)[0],
+            owner: vesterInterface.decodeFunctionResult("ownerOf", resp[3].returnData)[0],
+            tokenSymbol: tokenSymbol
+        })
+    } catch { }
 
-    return Promise.all([grantData, amountVested, amountAvailable])
+    return resp
 }
 
 export const fetchGrants = async (setGrant) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
-    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
+    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider);
     let promises = []
 
     const totalSupply = await vesterContract.totalSupply();
     for (let i = 0; i < totalSupply.toNumber(); i++) {
-        const tokenId = await vesterContract.tokenByIndex(i);
-        promises.push(await fetchGrant(setGrant, tokenId))
+        promises.push(await fetchGrant(setGrant, i))
     }
 
     return Promise.all(promises)
 }
 
 export const redeemGrant = async (tokenId, exchangeTokenAmount, exchangeTokenAddress, setGrant, setEvents) => {
-    const provider = new ethers.providers.Web3Provider(window?.ethereum) //or should this be passed in?
-    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
+    const provider = new ethers.providers.Web3Provider(window?.ethereum)
+    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider);
 
     const submitToastEvent = () => {
         toast({
@@ -140,7 +166,7 @@ export const redeemGrant = async (tokenId, exchangeTokenAmount, exchangeTokenAdd
         const exchangeTokenAmountParsed = ethers.utils.parseEther(exchangeTokenAmount.toString())
         const exchangeTokenAddressParsed = ethers.utils.getAddress(exchangeTokenAddress)
 
-        const erc20Contract = new ethers.Contract(exchangeTokenAddressParsed, erc20Abi.abi, provider); // should be provider.getSigner() ?
+        const erc20Contract = new ethers.Contract(exchangeTokenAddressParsed, erc20Abi.abi, provider);
         return await erc20Contract.connect(provider.getSigner()).approve(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, exchangeTokenAmountParsed).then(async () => {
             return await vesterContract.connect(provider.getSigner()).redeemWithTransfer(tokenId, exchangeTokenAddressParsed, exchangeTokenAmountParsed)
                 .then(submitToastEvent)
@@ -155,7 +181,7 @@ export const redeemGrant = async (tokenId, exchangeTokenAmount, exchangeTokenAdd
 
 export const redeemAll = async () => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum) //or should this be passed in?
-    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider); // should be provider.getSigner() ?
+    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider);
 
     const submitToastEvent = () => {
         toast({

@@ -26,10 +26,10 @@ export default function UserGrants() {
 
   const makeGrantElement = (grant, ind) => {
     return (<Box key={ind} mb={12}>
-      <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId.toNumber()}</Text>
-      <GrantStatus tokenId={grant.tokenId.toNumber()} cancelled={grant.cancelled} />
-      {grant.cancelled ? "" : <RedeemTokens tokenId={grant.tokenId.toNumber()} />}
-      <RecentActivity tokenId={grant.tokenId.toNumber()} />
+      <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId}</Text>
+      <GrantStatus tokenId={grant.tokenId} cancelled={grant.cancelled} />
+      {grant.cancelled ? "" : <RedeemTokens tokenId={grant.tokenId} />}
+      <RecentActivity tokenId={grant.tokenId} />
       <Text fontSize="sm" my={6}><InfoOutlineIcon style={{ transform: 'translateY(-1px)' }} mr={1} /> Each grant is an NFT at the contract address <EtherscanLink
         d="inline"
         borderBottom="1px rgba(255,255,255,0.66) dotted"

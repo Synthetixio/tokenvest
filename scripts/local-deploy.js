@@ -30,7 +30,7 @@ async function main() {
   console.log("Vester deployed to:", vester.address);
   console.log("Sample Token deployed to:", sampleToken.address);
 
-  const data = `NEXT_PUBLIC_MULTISIG_ADDRESS=${ownerAddress}\nNEXT_PUBLIC_VESTER_CONTRACT_ADDRESS=${vester.address}`
+  const data = `NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS=${vester.address}`
   fs.writeFileSync("frontend/.env.local", data);
 
   console.log("frontend/.env.local updated")
