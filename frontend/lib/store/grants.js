@@ -119,6 +119,20 @@ export const fetchGrants = async (setGrant) => {
     return Promise.all(promises)
 }
 
+export const fetchGrantsByUser = async (setGrant, owner) => {
+    const provider = new ethers.providers.Web3Provider(window?.ethereum)
+    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider);
+    let promises = []
+
+    const totalSupply = await vesterContract.balanceOf(owner);
+    for (let i = 0; i < totalSupply.toNumber(); i++) {
+        const grantId = await vesterContract.tokenOfOwnerByIndex(owner, i);
+        promises.push(await fetchGrant(setGrant, grantId))
+    }
+
+    return Promise.all(promises)
+}
+
 export const redeemGrant = async (tokenId, exchangeTokenAmount, exchangeTokenAddress, setGrant, setEvents) => {
     const provider = new ethers.providers.Web3Provider(window?.ethereum)
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider);

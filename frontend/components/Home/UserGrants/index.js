@@ -7,7 +7,7 @@ import RedeemAll from './RedeemAll'
 import RecentActivity from '../../shared/RecentActivity'
 import EtherscanLink from '../../shared/EtherscanLink'
 import { useRecoilState } from 'recoil'
-import { getGrantsByUser, fetchGrants } from '../../../lib/store/grants'
+import { getGrantsByUser, fetchGrantsByUser } from '../../../lib/store/grants'
 import { eventsState, fetchEvents } from '../../../lib/store/events'
 import { useAccount } from 'wagmi'
 
@@ -19,10 +19,12 @@ export default function UserGrants() {
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchEvents(setEvents), fetchGrants(setGrant)]).finally(() => {
-      setLoadingData(false)
-    })
-  }, [])
+    if (data) {
+      Promise.all([fetchEvents(setEvents), fetchGrantsByUser(setGrant, data.address)]).finally(() => {
+        setLoadingData(false)
+      })
+    }
+  }, [data])
 
   const makeGrantElement = (grant, ind) => {
     return (<Box key={ind} mb={12}>
@@ -41,11 +43,11 @@ export default function UserGrants() {
     </Box>)
   }
 
-  const noGrantsText = <Text textAlign="center" py={16} fontWeight="thin" fontSize="3xl" letterSpacing={1.5}>There are no grants associated with this wallet.</Text>
+  const noGrantsText = <Text textAlign="center" py={16} fontWeight="thin" fontSize="2xl" letterSpacing={1.5}>There are no grants associated with this wallet.</Text>
 
   const numNonZeroAvailable = grants.length ? grants.filter(g => g.amountAvailable.gt(0)).length : 0;
 
-  return loadingData ? <Spinner d="block" mx="auto" my={6} /> :
+  return loadingData ? (data ? <Spinner d="block" mx="auto" my={6} /> : <Text textAlign="center" py={16} fontWeight="thin" fontSize="2xl" letterSpacing={1.5}>Connect a wallet to view grants</Text>) :
     (grants.length ? <div>
       {numNonZeroAvailable > 1 ? <RedeemAll /> : ""}
       {[...grants].reverse().map(makeGrantElement)}
