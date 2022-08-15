@@ -17,7 +17,7 @@ export default function CancelButton({ tokenId }) {
       console.log(err)
       toast({
         title: "Error",
-        description: err?.data?.message || err,
+        description: err?.data?.message || err?.error?.data?.message,
         status: "error",
         isClosable: true,
       });

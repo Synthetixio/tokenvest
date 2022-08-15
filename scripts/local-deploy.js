@@ -4,7 +4,7 @@ const fs = require('fs');
 async function main() {
   await hre.run('compile');
 
-  const testerAddress = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+  const testerAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
 
   const SampleToken = await hre.ethers.getContractFactory("SampleToken");
   const sampleToken = await SampleToken.deploy();
@@ -16,9 +16,10 @@ async function main() {
   const vester = await Vester.deploy("Token Grant", "gTKN", testerAddress);
 
   await vester.deployed();
+  const signer = vester.provider.getSigner(testerAddress)
 
   await sampleToken.mint(vester.address, ethers.utils.parseEther("30000"))
-  await vester.mint(
+  await vester.connect(signer).mint(
     "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
     sampleToken.address,
     Math.floor(Date.now() / 1000) - (7889400 * 2), // start timestamp
@@ -28,7 +29,6 @@ async function main() {
     ethers.utils.parseEther("2500"), // redeemed
     7889400 // vest interval
   );
-  const ownerAddress = await vester.owner()
 
   console.log("Vester deployed to:", vester.address);
   console.log("Sample Token deployed to:", sampleToken.address);
