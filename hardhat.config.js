@@ -8,7 +8,7 @@ require("@nomiclabs/hardhat-etherscan");
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.8.4",
+  solidity: "0.8.12",
   networks: {
     hardhat: {
       chainId: 1337 // see: https://hardhat.org/metamask-issue.html

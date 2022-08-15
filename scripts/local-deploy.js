@@ -9,6 +9,9 @@ async function main() {
   const SampleToken = await hre.ethers.getContractFactory("SampleToken");
   const sampleToken = await SampleToken.deploy();
 
+  const Multicall3 = await hre.ethers.getContractFactory("Multicall3");
+  const multicall3 = await Multicall3.deploy();
+
   const Vester = await hre.ethers.getContractFactory("Vester");
   const vester = await Vester.deploy("Token Grant", "gTKN", testerAddress);
 
@@ -30,7 +33,7 @@ async function main() {
   console.log("Vester deployed to:", vester.address);
   console.log("Sample Token deployed to:", sampleToken.address);
 
-  const data = `NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS=${vester.address}`
+  const data = `NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS=${vester.address}\nNEXT_PUBLIC_MULTICALL_ADDRESS=${multicall3.address}`
   fs.writeFileSync("frontend/.env.local", data);
 
   console.log("frontend/.env.local updated")

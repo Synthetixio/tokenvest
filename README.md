@@ -1,6 +1,6 @@
 # Tokenvest
 
-**Note:** The front-end now relies on Multicall3. Set `NEXT_PUBLIC_MULTICALL_ADDRESS` accordingly. This should be added to `scripts/local-deploy.js`. Ultimately, this should use a subgraph instead.
+**Note:** The front-end now relies on Multicall3. Set `NEXT_PUBLIC_MULTICALL_ADDRESS` accordingly.
 
 ## Overview
 

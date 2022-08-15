@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Text, Spinner, Link } from '@chakra-ui/react'
+import { Box, Text, Spinner } from '@chakra-ui/react'
 import { InfoOutlineIcon } from '@chakra-ui/icons'
 import GrantStatus from './GrantStatus'
 import RedeemTokens from './RedeemTokens'
@@ -28,7 +28,7 @@ export default function UserGrants() {
 
   const makeGrantElement = (grant, ind) => {
     return (<Box key={ind} mb={12}>
-      <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId}</Text>
+      <Text fontSize='xs' fontWeight="semibold" lineHeight={1} textTransform="uppercase" letterSpacing={1} mb={4}>Grant #{grant.tokenId.toNumber()}</Text>
       <GrantStatus tokenId={grant.tokenId} cancelled={grant.cancelled} />
       {grant.cancelled ? "" : <RedeemTokens tokenId={grant.tokenId} />}
       <RecentActivity tokenId={grant.tokenId} />
