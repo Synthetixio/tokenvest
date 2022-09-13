@@ -19,7 +19,6 @@ export default function Admin() {
     getOwner();
   }, [])
 
-  console.log(address, owner)
   const shouldRender = isSuccess && address && address == owner;
 
   return (
