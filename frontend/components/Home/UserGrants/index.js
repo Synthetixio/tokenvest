@@ -12,19 +12,19 @@ import { eventsState, fetchEvents } from '../../../lib/store/events'
 import { useAccount } from 'wagmi'
 
 export default function UserGrants() {
-  const { data } = useAccount()
+  const { address } = useAccount()
 
-  const [grants, setGrant] = useRecoilState(getGrantsByUser(data?.address));
+  const [grants, setGrant] = useRecoilState(getGrantsByUser(address));
   const [events, setEvents] = useRecoilState(eventsState);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    if (data) {
-      Promise.all([fetchEvents(setEvents), fetchGrantsByUser(setGrant, data.address)]).finally(() => {
+    if (address) {
+      Promise.all([fetchEvents(setEvents), fetchGrantsByUser(setGrant, address)]).finally(() => {
         setLoadingData(false)
       })
     }
-  }, [data])
+  }, [address])
 
   const makeGrantElement = (grant, ind) => {
     return (<Box key={ind} mb={12}>
@@ -47,7 +47,7 @@ export default function UserGrants() {
 
   const numNonZeroAvailable = grants.length ? grants.filter(g => g.amountAvailable.gt(0)).length : 0;
 
-  return loadingData ? (data ? <Spinner d="block" mx="auto" my={6} /> : <Text textAlign="center" py={16} fontWeight="thin" fontSize="2xl" letterSpacing={1.5}>Connect a wallet to view grants</Text>) :
+  return loadingData ? (address ? <Spinner d="block" mx="auto" my={6} /> : <Text textAlign="center" py={16} fontWeight="thin" fontSize="2xl" letterSpacing={1.5}>Connect a wallet to view grants</Text>) :
     (grants.length ? <div>
       {numNonZeroAvailable > 1 ? <RedeemAll /> : ""}
       {[...grants].reverse().map(makeGrantElement)}

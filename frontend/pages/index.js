@@ -3,12 +3,12 @@ import UserGrants from '../components/Home/UserGrants'
 import { useAccount } from 'wagmi'
 
 export default function Home() {
-  const { isSuccess } = useAccount()
+  const { address } = useAccount()
 
   return (
     <div>
       <main>
-        {isSuccess ? (
+        {address ? (
           <UserGrants />
         ) : (
           <Text textAlign="center" py={16} fontWeight="thin" fontSize="3xl" letterSpacing={1.5}>Connect your wallet to view your grants and redeem available tokens.</Text>
