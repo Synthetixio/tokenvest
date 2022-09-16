@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 
 export default function Admin() {
-  const { isSuccess, address } = useAccount();
+  const { address } = useAccount();
 
   const [owner, setOwner] = useState(null);
   useEffect(() => {
@@ -19,8 +19,7 @@ export default function Admin() {
     getOwner();
   }, [])
 
-  console.log(address, owner);
-  const shouldRender = isSuccess && address;// && address == owner;
+  const shouldRender = address;// && address == owner;
 
   return (
     <div>
