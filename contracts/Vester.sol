@@ -5,65 +5,67 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./IVester.sol";
 
 /// @title Vesting Contract
-/// @author Noah Litvin (@noahlitvin)
+/// @author Noah Litvin (@noahlitvin) and Amar(mohindar99)
 /// @notice This contract allows the recipient of a grant to redeem tokens each vesting interval, up to a total amount with an optional cliff.
-contract Vester is ERC721Enumerable, ReentrancyGuard {
-
+contract Vester is IVester, ERC721Enumerable, ReentrancyGuard {
     using SafeERC20 for IERC20;
-
-    struct Grant {
-        uint128 vestAmount;
-        uint128 totalAmount;
-        uint128 amountRedeemed;
-        uint64 startTimestamp;
-        uint64 cliffTimestamp;
-        uint32 vestInterval;
-        address tokenAddress;
-        bool cancelled;
-    }
 
     address public owner;
     address public nominatedOwner;
-    uint public tokenCounter;
-    mapping (uint => Grant) public grants;
+    uint256 public tokenCounter;
+    mapping(uint256 => Grant) public grants;
 
-    constructor(string memory name, string memory symbol, address _owner) ERC721(name, symbol) {
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can call this function.");
+        _;
+    }
+
+    constructor(
+        string memory name,
+        string memory symbol,
+        address _owner
+    ) ERC721(name, symbol) {
         owner = _owner;
     }
 
     /// @notice Redeem all available vested tokens from a single grant
-    function redeem(uint tokenId) public {        
+    function redeem(uint256 tokenId) public override {
         _redeem(tokenId, true);
     }
 
     /// @notice Redeem multiple token grants, any failure will revert all redeems
-    function redeemMultiple(uint[] calldata tokenIds) public {
-        for (uint i = 0; i < tokenIds.length; i++) {
+    function redeemMultiple(uint256[] calldata tokenIds) public override {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             redeem(tokenIds[i]);
         }
     }
 
     /// @notice Redeem all available vested tokens from all grants, may run out of gas, in which case
     /// use redeemMultiple(). Any failure will revert all redeems.
-    function redeemAll() public {
-        uint numTokens = balanceOf(msg.sender); // number of tokens owned by sender
-        for (uint i = 0; i < numTokens; i++) {
+    function redeemAll() public override {
+        uint256 numTokens = balanceOf(msg.sender); // number of tokens owned by sender
+        for (uint256 i = 0; i < numTokens; i++) {
             // skip non vested grants silently
             _redeem(tokenOfOwnerByIndex(msg.sender, i), false);
         }
     }
 
     /// @dev nonReentrant because may be used in a loop (with different tokens)
-    function _redeem(uint tokenId, bool requireNonZero) internal nonReentrant {
+
+    function _redeem(uint256 tokenId, bool requireNonZero)
+        internal
+        nonReentrant
+    {
         require(ownerOf(tokenId) == msg.sender, "You don't own this grant.");
 
         uint128 amount = availableForRedemption(tokenId);
 
         if (amount == 0) {
             if (requireNonZero) {
-                revert("No tokens available for redemption of grant");        
+                revert("No tokens available for redemption of grant");
             } else {
                 return; // nothing to do
             }
@@ -72,7 +74,10 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
         IERC20 tokenContract = IERC20(grants[tokenId].tokenAddress);
 
         // this is for clarity only (safetransfer revert may be less clear)
-        require(tokenContract.balanceOf(address(this)) >= amount, "More tokens must be transferred to this contract before you can redeem.");
+        require(
+            tokenContract.balanceOf(address(this)) >= amount,
+            "More tokens must be transferred to this contract before you can redeem."
+        );
 
         grants[tokenId].amountRedeemed += amount;
         tokenContract.safeTransfer(msg.sender, amount);
@@ -83,10 +88,18 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
     /// @notice Redeem all available vested tokens and transfer in arbitrary tokens (to make this an exchange rather than income)
     /// @param incomingTokenAddress The address of the token being transferred in
     /// @param incomingTokenAmount The amount of the token being transferred in
-    function redeemWithTransfer(uint tokenId, address incomingTokenAddress, uint incomingTokenAmount) external {
+    function redeemWithTransfer(
+        uint256 tokenId,
+        address incomingTokenAddress,
+        uint256 incomingTokenAmount
+    ) external override {
         IERC20 incomingTokenContract = IERC20(incomingTokenAddress);
         redeem(tokenId);
-        incomingTokenContract.safeTransferFrom(msg.sender, address(this), incomingTokenAmount);
+        incomingTokenContract.safeTransferFrom(
+            msg.sender,
+            address(this),
+            incomingTokenAmount
+        );
     }
 
     /// @notice Calculate the amount of tokens currently available for redemption for a given grant
@@ -94,32 +107,43 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
     /// @dev This subtracts the amount of previously redeemed token from the total amount that has vested.
     /// @param tokenId The ID of the grant
     /// @return The amount available for redemption, denominated in tokens * 10^18
-    function availableForRedemption(uint tokenId) public view returns (uint128) {
+    function availableForRedemption(uint256 tokenId)
+        public
+        view
+        override
+        returns (uint128)
+    {
         uint128 vested = amountVested(tokenId);
         uint128 redeemed = grants[tokenId].amountRedeemed;
-        if (grants[tokenId].cancelled || vested < redeemed ) {
+        if (grants[tokenId].cancelled || vested < redeemed) {
             return 0;
         } else {
             return vested - redeemed;
-        }        
+        }
     }
 
     /// @notice Calculate the amount that has vested for a given grant
     /// @param tokenId The ID of the grant
     /// @return The amount of vested tokens, denominated in tokens * 10^18
-    function amountVested(uint tokenId) public view returns (uint128) {
+    function amountVested(uint256 tokenId)
+        public
+        view
+        override
+        returns (uint128)
+    {
         Grant memory grant = grants[tokenId];
 
         // Nothing has vested until the cliff has past.
-        if(block.timestamp < grant.cliffTimestamp){
+        if (block.timestamp < grant.cliffTimestamp) {
             return 0;
         }
 
         // Calculate the number of intervals elapsed (will round down) multiplied by the amount to vest per vesting interval.
-        uint128 amount = ((uint128(block.timestamp) - grant.startTimestamp) / grant.vestInterval) * grant.vestAmount;
+        uint128 amount = ((uint128(block.timestamp) - grant.startTimestamp) /
+            grant.vestInterval) * grant.vestAmount;
 
         // The total amount vested cannot exceed total grant size.
-        if(amount > grant.totalAmount){
+        if (amount > grant.totalAmount) {
             return grant.totalAmount;
         }
 
@@ -129,8 +153,13 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
     /// @notice Supply tokens to this contract so that tokens don't need to be sent directly to contract
     /// @param tokenAddress The address of the ERC20 token to supply
     /// @param amount amount to supply
-    function supply(address tokenAddress, uint amount) external {
-        IERC20(tokenAddress).safeTransferFrom(msg.sender, address(this), amount);
+
+    function supply(address tokenAddress, uint256 amount) external override {
+        IERC20(tokenAddress).safeTransferFrom(
+            msg.sender,
+            address(this),
+            amount
+        );
 
         emit Supply(msg.sender, tokenAddress, amount);
     }
@@ -138,10 +167,21 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
     /// @notice Withdraw tokens owned by this contract to the caller
     /// @dev Only the owner of the contract may call this function.
     /// @param withdrawalTokenAddress The address of the ERC20 token to redeem
-    function withdraw(address withdrawalTokenAddress, uint withdrawalTokenAmount) public onlyOwner {
-        IERC20(withdrawalTokenAddress).safeTransfer(msg.sender, withdrawalTokenAmount);
 
-        emit Withdrawal(msg.sender, withdrawalTokenAddress, withdrawalTokenAmount);
+    function withdraw(
+        address withdrawalTokenAddress,
+        uint256 withdrawalTokenAmount
+    ) public override onlyOwner {
+        IERC20(withdrawalTokenAddress).safeTransfer(
+            msg.sender,
+            withdrawalTokenAmount
+        );
+
+        emit Withdrawal(
+            msg.sender,
+            withdrawalTokenAddress,
+            withdrawalTokenAmount
+        );
     }
 
     /// @notice Replace an existing grant by cancelling the old one and minting a new one
@@ -154,9 +194,27 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
     /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
-    function replaceGrant(uint tokenId, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {        
+    function replaceGrant(
+        uint256 tokenId,
+        address tokenAddress,
+        uint64 startTimestamp,
+        uint64 cliffTimestamp,
+        uint128 vestAmount,
+        uint128 totalAmount,
+        uint128 amountRedeemed,
+        uint32 vestInterval
+    ) public override onlyOwner {
         cancelGrant(tokenId);
-        mint(ownerOf(tokenId), tokenAddress, startTimestamp, cliffTimestamp, vestAmount, totalAmount, amountRedeemed, vestInterval);
+        mint(
+            ownerOf(tokenId),
+            tokenAddress,
+            startTimestamp,
+            cliffTimestamp,
+            vestAmount,
+            totalAmount,
+            amountRedeemed,
+            vestInterval
+        );
     }
 
     /// @notice Create a new grant
@@ -169,13 +227,22 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
     /// @param totalAmount The total amount of tokens that will be granted to the recipient, denominated in tokens * 10^18
     /// @param amountRedeemed The amount of tokens already redeemed by this recipient
     /// @param vestInterval The vesting period in seconds
-    function mint(address granteeAddress, address tokenAddress, uint64 startTimestamp, uint64 cliffTimestamp, uint128 vestAmount, uint128 totalAmount, uint128 amountRedeemed, uint32 vestInterval) public onlyOwner {
+    function mint(
+        address granteeAddress,
+        address tokenAddress,
+        uint64 startTimestamp,
+        uint64 cliffTimestamp,
+        uint128 vestAmount,
+        uint128 totalAmount,
+        uint128 amountRedeemed,
+        uint32 vestInterval
+    ) public override onlyOwner {
         // input validation
         require(startTimestamp > 0, "startTimestamp is zero"); // probably immediately redeemable
         require(vestInterval > 0, "vestInterval is zero"); // don't divide by zero
-        require(amountRedeemed <=  totalAmount, "redeemed higher than total"); 
+        require(amountRedeemed <= totalAmount, "redeemed higher than total");
 
-        uint tokenId = tokenCounter;
+        uint256 tokenId = tokenCounter;
         tokenCounter++;
 
         grants[tokenId] = Grant({
@@ -195,7 +262,7 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
     /// @notice cancel a grant, cannot be undone (new grant has to be minted)
     /// @dev Only the owner of the contract may call this function.
     /// @param tokenId The ID of the grant
-    function cancelGrant(uint tokenId) public onlyOwner {
+    function cancelGrant(uint256 tokenId) public override onlyOwner {
         require(!grants[tokenId].cancelled, "Already cancelled");
         grants[tokenId].cancelled = true;
         emit GrantCancelled(tokenId);
@@ -203,29 +270,16 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
 
     /// @notice Nominate a new owner
     /// @dev Only the owner of the contract may call this function.
-    function nominateOwner(address nominee) external onlyOwner {
+    function nominateOwner(address nominee) external override onlyOwner {
         nominatedOwner = nominee;
         emit OwnerNomination(nominee);
     }
 
     /// @notice Accept ownership if nominated
-    function acceptOwnership() external {
+    function acceptOwnership() external override {
         require(msg.sender == nominatedOwner);
         emit OwnerUpdate(owner, nominatedOwner);
         owner = nominatedOwner;
         nominatedOwner = address(0);
     }
-
-    modifier onlyOwner {
-        require(msg.sender == owner, "Only the owner can call this function.");
-        _;
-    }
-
-    event Redemption(uint indexed tokenId, address indexed redeemerAddress, uint128 amount);
-    event GrantCreated(uint indexed tokenId);
-    event GrantCancelled(uint indexed tokenId);
-    event Supply(address supplierAddress, address indexed tokenAddress, uint amount);
-    event Withdrawal(address indexed withdrawerAddress, address indexed withdrawalTokenAddress, uint amount);
-    event OwnerNomination(address indexed newOwner);
-    event OwnerUpdate(address indexed oldOwner, address indexed newOwner);
 }
