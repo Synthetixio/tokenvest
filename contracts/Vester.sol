@@ -108,7 +108,7 @@ contract Vester is ERC721Enumerable, ReentrancyGuard {
     /// @param tokenId The ID of the grant
     /// @return The amount of vested tokens, denominated in tokens * 10^18
     function amountVested(uint tokenId) public view returns (uint128) {
-        Grant storage grant = grants[tokenId];
+        Grant memory grant = grants[tokenId];
 
         // Nothing has vested until the cliff has past.
         if(block.timestamp < grant.cliffTimestamp){
