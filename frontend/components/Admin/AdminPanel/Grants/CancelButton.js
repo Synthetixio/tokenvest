@@ -2,11 +2,11 @@ import { ethers } from 'ethers'
 import { useToast } from '@chakra-ui/react'
 import { DeleteIcon } from '@chakra-ui/icons'
 import vesterAbi from '../../../../abis/Vester.json'
-import { useSigner } from 'wagmi'
+import { useWalletClient } from 'wagmi'
 
 export default function CancelButton({ tokenId }) {
   const toast = useToast();
-  const { data: signer } = useSigner()
+  const { data: signer } = useWalletClient()
 
   const executeCancel = async () => {
     const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, signer);
