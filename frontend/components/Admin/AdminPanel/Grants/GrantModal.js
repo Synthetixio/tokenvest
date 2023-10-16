@@ -22,10 +22,10 @@ import { EditIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
 import vesterAbi from '../../../../abis/Vester.json'
 import { useToast } from '@chakra-ui/react'
-import { useSigner } from 'wagmi'
+import { useWalletClient } from 'wagmi'
 
 export default function GrantModal({ grant }) {
-  const { data: signer } = useSigner()
+  const { data: signer } = useWalletClient()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast();
 

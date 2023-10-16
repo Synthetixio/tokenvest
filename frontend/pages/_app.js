@@ -10,17 +10,21 @@ import {
   darkTheme
 } from '@rainbow-me/rainbowkit';
 import {
-  chain,
-  configureChains,
+  createConfig,
   createClient,
   WagmiConfig,
+  configureChains,
 } from 'wagmi';
+import {
+  mainnet,
+  optimism
+} from 'wagmi/chains';
 import { infuraProvider } from 'wagmi/providers/infura';
 import { publicProvider } from 'wagmi/providers/public';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
-const { chains, provider } = configureChains(
-  [chain.mainnet, chain.optimism, chain.rinkeby],
+const { chains, publicClient } = configureChains(
+  [mainnet, optimism],
   [
     infuraProvider({ infuraId: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID }),
     publicProvider()
@@ -29,13 +33,14 @@ const { chains, provider } = configureChains(
 
 const { connectors } = getDefaultWallets({
   appName: 'Tokenvest',
+  projectId: '43f15102a1f8aa2f158d5016a454def6',
   chains
 });
 
-const wagmiClient = createClient({
+const wagmiConfig = createConfig({
   autoConnect: true,
   connectors,
-  provider
+  publicClient
 })
 
 if (typeof window !== "undefined") {
@@ -51,7 +56,7 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <RecoilRoot>
-      <WagmiConfig client={wagmiClient}>
+      <WagmiConfig config={wagmiConfig}>
         <RainbowKitProvider chains={chains} theme={darkTheme()}>
           <ColorModeScript initialColorMode={theme.config.initialColorMode} />
           <ChakraProvider theme={theme}>
