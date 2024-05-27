@@ -21,10 +21,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 const { chains, provider } = configureChains(
   [chain.mainnet, chain.optimism, chain.rinkeby],
-  [
-    infuraProvider({ infuraId: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID }),
-    publicProvider()
-  ]
+  [infuraProvider({ infuraId: process.env.NEXT_PUBLIC_INFURA_PROJECT_ID })]
 );
 
 const { connectors } = getDefaultWallets({
