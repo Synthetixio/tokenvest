@@ -53,7 +53,7 @@ export const fetchEvents = async (setEvents) => {
   }
   // Always use infura for fetching events, provider from wallet can be really slow
   const provider = new ethers.providers.JsonRpcProvider(
-    `https://${networkIdToName}.infura.io/v3/8c6bfe963db94518b16b17114e29e628`
+    `https://${infuraName}.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`
   );
 
   const vesterContract = new ethers.Contract(
