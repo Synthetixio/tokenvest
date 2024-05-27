@@ -53,44 +53,23 @@ export const getGrantsByUser = selectorFamily({
     }
 });
 
-
+const networkIdToName = {
+  1: "mainnet",
+  10: "optimism-mainnet",
+};
 /**** ACTIONS ****/
 
-export const fetchGrant = async (setGrant, tokenId) => {
-    const provider = new ethers.providers.Web3Provider(window?.ethereum)
-
-    let vesterInterface = new ethers.utils.Interface(vesterAbi.abi);
-    let multicallArgs = [
-        {
-            target: process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
-            callData: vesterInterface.encodeFunctionData("grants", [tokenId]),
-            allowFailure: true,
-            value: 0,
-        },
-        {
-            target: process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
-            callData: vesterInterface.encodeFunctionData("amountVested", [tokenId]),
-            allowFailure: true,
-            value: 0,
-        },
-        {
-            target: process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
-            callData: vesterInterface.encodeFunctionData("availableForRedemption", [tokenId]),
-            allowFailure: true,
-            value: 0,
-        },
-        {
-            target: process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
-            callData: vesterInterface.encodeFunctionData("ownerOf", [tokenId]),
-            allowFailure: true,
-            value: 0,
-        },
-    ]
-    const multicallContract = new ethers.Contract(process.env.NEXT_PUBLIC_MULTICALL_ADDRESS, multicall3Abi.abi, provider);
-    const resp = await multicallContract.callStatic.aggregate3Value(multicallArgs)
-    const grantData = vesterInterface.decodeFunctionResult("grants", resp[0].returnData)
-    const erc20Contract = new ethers.Contract(grantData.tokenAddress, erc20Abi.abi, provider);
-    const tokenSymbol = await erc20Contract.symbol();
+export const fetchGrant = async (setGrant, tokenId, networkId) => {
+  const infuraName = networkIdToName[networkId];
+  if (!infuraName) {
+    console.error(`Invalid network id ${networkId}, check events.js`);
+    throw Error("Invalid network id:" + networkId);
+  }
+  // Always use infura for fetching events, provider from wallet can be really slow
+  const provider = new ethers.providers.JsonRpcProvider({
+    url: `https://${infuraName}.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`,
+    skipFetchSetup: true,
+  });
 
     try {
         setGrant({
@@ -106,10 +85,17 @@ export const fetchGrant = async (setGrant, tokenId) => {
     return resp
 }
 
-export const fetchGrants = async (setGrant) => {
-    const provider = new ethers.providers.Web3Provider(window?.ethereum)
-    const vesterContract = new ethers.Contract(process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS, vesterAbi.abi, provider);
-    let promises = []
+export const fetchGrants = async (setGrant, networkId) => {
+  const infuraName = networkIdToName[networkId];
+
+  if (!infuraName) {
+    console.error(`Invalid network id ${networkId}, check events.js`);
+    throw Error("Invalid network id:" + networkId);
+  }
+  // Always use infura for fetching events, provider from wallet can be really slow
+  const provider = new ethers.providers.JsonRpcProvider(
+    `https://${infuraName}.infura.io/v3/8c6bfe963db94518b16b17114e29e628`
+  );
 
     const totalSupply = await vesterContract.totalSupply();
     for (let i = 0; i < totalSupply.toNumber(); i++) {

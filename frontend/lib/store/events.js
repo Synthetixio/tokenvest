@@ -44,9 +44,9 @@ const networkIdToName = {
 };
 /**** ACTIONS ****/
 
-export const fetchEvents = async (setEvents) => {
-  const networkId = window.ethereum.networkVersion;
+export const fetchEvents = async (setEvents, networkId) => {
   const infuraName = networkIdToName[networkId];
+
   if (!infuraName) {
     console.error(`Invalid network id ${networkId}, check events.js`);
     throw Error("Invalid network id:" + networkId);
