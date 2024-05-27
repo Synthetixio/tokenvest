@@ -35,17 +35,8 @@ const { connectors } = getDefaultWallets({
 const wagmiClient = createClient({
   autoConnect: true,
   connectors,
-  provider
-})
-
-if (typeof window !== "undefined") {
-  const currentProvider = new ethers.providers.Web3Provider(window.ethereum, "any");
-  currentProvider.on("network", (newNetwork, oldNetwork) => {
-    if (oldNetwork) {
-      window.location.reload();
-    }
-  });
-}
+  provider,
+});
 
 function MyApp({ Component, pageProps }) {
 
