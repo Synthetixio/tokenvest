@@ -44,16 +44,16 @@ const networkIdToName = {
 };
 /**** ACTIONS ****/
 
-export const fetchEvents = async (setEvents) => {
-  const networkId = window.ethereum.networkVersion;
+export const fetchEvents = async (setEvents, networkId) => {
   const infuraName = networkIdToName[networkId];
+
   if (!infuraName) {
     console.error(`Invalid network id ${networkId}, check events.js`);
     throw Error("Invalid network id:" + networkId);
   }
   // Always use infura for fetching events, provider from wallet can be really slow
   const provider = new ethers.providers.JsonRpcProvider(
-    `https://${networkIdToName}.infura.io/v3/8c6bfe963db94518b16b17114e29e628`
+    `https://${infuraName}.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`
   );
 
   const vesterContract = new ethers.Contract(
