@@ -1,4 +1,3 @@
-"use client";
 import {
   Box,
   ChakraProvider,
@@ -7,29 +6,19 @@ import {
   Flex,
   Heading,
 } from "@chakra-ui/react";
-import {
-  ConnectButton,
-  RainbowKitProvider,
-  getDefaultConfig,
-} from "@rainbow-me/rainbowkit";
-import "@rainbow-me/rainbowkit/styles.css";
+import { ConnectButton, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import Head from "next/head";
 import { RecoilRoot } from "recoil";
 import theme from "../styles/theme";
-import "@rainbow-me/rainbowkit/styles.css";
 import { WagmiProvider } from "wagmi";
-import { mainnet, optimism } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import "@rainbow-me/rainbowkit/styles.css";
 
-const config = getDefaultConfig({
-  appName: "My RainbowKit App",
-  projectId: "5075a2da602e17eec34aa77b40b321be",
-  chains: [mainnet, optimism],
-  ssr: true, // If your dApp uses server side rendering (SSR)
-});
+import { config } from "../utils/wagmi";
+
+const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }) {
-  const queryClient = new QueryClient();
   return (
     <RecoilRoot>
       <WagmiProvider config={config}>
