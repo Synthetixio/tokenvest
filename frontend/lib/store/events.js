@@ -1,6 +1,5 @@
 import { atom, selector, selectorFamily } from "recoil";
 import { ethers } from "ethers";
-import erc20Abi from "../../abis/SampleToken.json";
 import vesterAbi from "../../abis/Vester.json";
 
 /**** STATE ****/

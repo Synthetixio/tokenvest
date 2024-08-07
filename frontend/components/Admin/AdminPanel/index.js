@@ -11,8 +11,9 @@ export default function AdminPanel() {
   const [grants, setGrant] = useRecoilState(getGrants());
   const [events, setEvents] = useRecoilState(eventsState);
   const [loadingData, setLoadingData] = useState(true);
-  const { chain } = useNetwork();
-  const networkId = chain.id;
+  // const { chain } = useNetwork();
+  const networkId = "10";
+  // chain.id;
 
   useEffect(() => {
     if (!networkId) return;

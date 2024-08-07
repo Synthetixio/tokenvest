@@ -11,9 +11,9 @@ import { useAccount, useNetwork } from "wagmi";
 
 export default function UserGrants() {
   const { address } = useAccount();
-  const { chain } = useNetwork();
+  // const { chain } = useNetwork();
 
-  const networkId = chain.id;
+  const networkId = 10;
 
   const [grants, setGrant] = useRecoilState(getGrantsByUser(address));
   const [loadingData, setLoadingData] = useState(true);
@@ -24,7 +24,7 @@ export default function UserGrants() {
         setLoadingData(false);
       });
     }
-  }, [address, networkId]);
+  }, [address, networkId, setGrant]);
 
   const makeGrantElement = (grant, ind) => {
     return (
