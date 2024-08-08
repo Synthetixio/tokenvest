@@ -7,13 +7,12 @@ import RedeemAll from "./RedeemAll";
 import EtherscanLink from "../../shared/EtherscanLink";
 import { useRecoilState } from "recoil";
 import { getGrantsByUser, fetchGrantsByUser } from "../../../lib/store/grants";
-import { useAccount, useNetwork } from "wagmi";
+import { useAccount } from "wagmi";
 
 export default function UserGrants() {
-  const { address } = useAccount();
-  const { chain } = useNetwork();
+  const { address, chain } = useAccount();
 
-  const networkId = chain.id;
+  const networkId = chain.id || "10";
 
   const [grants, setGrant] = useRecoilState(getGrantsByUser(address));
   const [loadingData, setLoadingData] = useState(true);
@@ -24,7 +23,7 @@ export default function UserGrants() {
         setLoadingData(false);
       });
     }
-  }, [address, networkId]);
+  }, [address, networkId, setGrant]);
 
   const makeGrantElement = (grant, ind) => {
     return (

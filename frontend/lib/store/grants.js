@@ -196,7 +196,8 @@ export const fetchGrantsByUser = async (setGrant, owner, networkId) => {
   });
 
   const vesterContract = new ethers.Contract(
-    process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
+    process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS ||
+      "0x2E9918026db125c692aed46e18697755567f4c1E",
     vesterAbi.abi,
     provider
   );
