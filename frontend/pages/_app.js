@@ -10,11 +10,11 @@ import { ConnectButton, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import Head from "next/head";
 import { RecoilRoot } from "recoil";
 import theme from "../styles/theme";
-import { WagmiProvider } from "wagmi";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import "@rainbow-me/rainbowkit/styles.css";
-
 import { config } from "../utils/wagmi";
+import "@rainbow-me/rainbowkit/styles.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider } from "wagmi";
 
 const queryClient = new QueryClient();
 

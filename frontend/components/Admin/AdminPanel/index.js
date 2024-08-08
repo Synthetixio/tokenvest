@@ -6,13 +6,13 @@ import RecentActivity from "../../shared/RecentActivity";
 import { useRecoilState } from "recoil";
 import { getGrants, fetchGrants } from "../../../lib/store/grants";
 import { eventsState, fetchEvents } from "../../../lib/store/events";
-import { useNetwork } from "wagmi";
+import { useAccount } from "wagmi";
 
 export default function AdminPanel() {
   const [_, setGrant] = useRecoilState(getGrants());
   const [__, setEvents] = useRecoilState(eventsState);
   const [loadingData, setLoadingData] = useState(true);
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
   const networkId = chain.id || "10";
 
   useEffect(() => {

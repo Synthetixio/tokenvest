@@ -7,11 +7,10 @@ import RedeemAll from "./RedeemAll";
 import EtherscanLink from "../../shared/EtherscanLink";
 import { useRecoilState } from "recoil";
 import { getGrantsByUser, fetchGrantsByUser } from "../../../lib/store/grants";
-import { useAccount, useNetwork } from "wagmi";
+import { useAccount } from "wagmi";
 
 export default function UserGrants() {
-  const { address } = useAccount();
-  const { chain } = useNetwork();
+  const { address, chain } = useAccount();
 
   const networkId = chain.id || "10";
 
