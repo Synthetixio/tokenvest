@@ -3,7 +3,7 @@ import { mainnet, optimism } from "wagmi/chains";
 
 export const config = getDefaultConfig({
   appName: "RainbowKit demo",
-  projectId: "5075a2da602e17eec34aa77b40b321be",
+  projectId: "e1ee7fb2294ba6988418183b643d62b8",
   chains: [mainnet, optimism],
   ssr: true,
 });
