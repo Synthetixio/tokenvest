@@ -19,7 +19,7 @@ export const grantsState = atom({
 export const getGrants = selectorFamily({
   key: "getGrants",
   get:
-    (address) =>
+    (_) =>
     ({ get }) => {
       return Object.values(get(grantsState));
     },
@@ -77,7 +77,7 @@ export const fetchGrant = async (setGrant, tokenId, networkId) => {
     throw Error("Invalid network id:" + networkId);
   }
   // Always use infura for fetching events, provider from wallet can be really slow
-  const provider = new ethers.providers.JsonRpcProvider({
+  const provider = new ethers.providers.JsonRpcBatchProvider({
     url: `https://${infuraName}.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`,
     skipFetchSetup: true,
   });
@@ -162,7 +162,7 @@ export const fetchGrants = async (setGrant, networkId) => {
     throw Error("Invalid network id:" + networkId);
   }
   // Always use infura for fetching events, provider from wallet can be really slow
-  const provider = new ethers.providers.JsonRpcProvider(
+  const provider = new ethers.providers.JsonRpcBatchProvider(
     `https://${infuraName}.infura.io/v3/8c6bfe963db94518b16b17114e29e628`
   );
   const vesterContract = new ethers.Contract(
@@ -190,7 +190,7 @@ export const fetchGrantsByUser = async (setGrant, owner, networkId) => {
     throw Error("Invalid network id:" + networkId);
   }
   // Always use infura for fetching events, provider from wallet can be really slow
-  const provider = new ethers.providers.JsonRpcProvider({
+  const provider = new ethers.providers.JsonRpcBatchProvider({
     url: `https://${infuraName}.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`,
     skipFetchSetup: true,
   });

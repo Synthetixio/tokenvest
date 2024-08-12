@@ -4,26 +4,27 @@ import { useAccount } from "wagmi";
 import vesterAbi from "../abis/Vester.json";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { useEthersSigner } from "../utils/ethers";
 
 export default function Admin() {
-  const { address } = useAccount();
-
-  const [_, setOwner] = useState(null);
+  const { address, chain } = useAccount();
+  const signer = useEthersSigner({ chainId: chain?.id || "10" });
+  const [owner, setOwner] = useState(null);
   useEffect(() => {
     async function getOwner() {
-      const provider = new ethers.providers.Web3Provider(window?.ethereum);
+      if (!signer) return;
       const vesterContract = new ethers.Contract(
         process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
         vesterAbi.abi,
-        provider
+        signer
       ); // should be provider.getSigner() ?
       const owner = await vesterContract.owner();
       setOwner(owner);
     }
     getOwner();
-  }, []);
+  }, [signer]);
 
-  const shouldRender = address; // && address == owner;
+  const shouldRender = address;
 
   return (
     <div>

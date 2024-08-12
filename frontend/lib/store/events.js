@@ -51,7 +51,7 @@ export const fetchEvents = async (setEvents, networkId) => {
     throw Error("Invalid network id:" + networkId);
   }
   // Always use infura for fetching events, provider from wallet can be really slow
-  const provider = new ethers.providers.JsonRpcProvider(
+  const provider = new ethers.providers.JsonRpcBatchProvider(
     `https://${infuraName}.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`
   );
 
@@ -59,7 +59,7 @@ export const fetchEvents = async (setEvents, networkId) => {
     process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
     vesterAbi.abi,
     provider
-  ); // should be provider.getSigner() ?
+  );
 
   let newEvents = {};
   // TODO: Make below more abstract, just gather all events

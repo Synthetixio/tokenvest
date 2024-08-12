@@ -20,9 +20,11 @@ export default function AdminPanel() {
     Promise.all([
       fetchEvents(setEvents, networkId),
       fetchGrants(setGrant, networkId),
-    ]).finally(() => {
-      setLoadingData(false);
-    });
+    ])
+      .catch((error) => console.error(error))
+      .finally(() => {
+        setLoadingData(false);
+      });
   }, [networkId]);
 
   return loadingData ? (
