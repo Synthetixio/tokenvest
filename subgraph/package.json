@@ -4,15 +4,17 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ alchemy/tokenvest",
-    "create-local": "graph create --node http://localhost:8020/ alchemy/tokenvest",
-    "remove-local": "graph remove --node http://localhost:8020/ alchemy/tokenvest",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 alchemy/tokenvest",
+    "deploy": "graph deploy tokenvest --version-label v0.0.1 --node https://subgraphs.alchemy.com/api/subgraphs/deploy --deploy-key $DEPLOY_KEY --ipfs https://ipfs.satsuma.xyz",
+    "create-local": "graph create --node http://localhost:8020/ tokenvest",
+    "remove-local": "graph remove --node http://localhost:8020/ tokenvest",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 tokenvest",
     "test": "graph test"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.80.1",
     "@graphprotocol/graph-ts": "0.32.0"
   },
-  "devDependencies": { "matchstick-as": "0.5.0" }
+  "devDependencies": {
+    "matchstick-as": "0.5.0"
+  }
 }
