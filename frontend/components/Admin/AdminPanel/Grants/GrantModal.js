@@ -27,7 +27,7 @@ import { useEthersSigner } from "../../../../utils/ethers";
 
 export default function GrantModal({ grant }) {
   const { chain } = useAccount();
-  const signer = useEthersSigner({ chainId: chain.id });
+  const signer = useEthersSigner({ chainId: chain?.id || "10" });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 

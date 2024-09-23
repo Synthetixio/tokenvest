@@ -1,6 +1,5 @@
 import { atom, selector, selectorFamily } from "recoil";
-import { ethers } from "ethers";
-import vesterAbi from "../../abis/Vester.json";
+import { subgraphQuery } from "../../utils/subgraph";
 
 /**** STATE ****/
 
@@ -37,101 +36,55 @@ export const getEventsByTokenId = selectorFamily({
     },
 });
 
-const networkIdToName = {
-  1: "mainnet",
-  10: "optimism-mainnet",
-};
 /**** ACTIONS ****/
 
-export const fetchEvents = async (setEvents, networkId) => {
-  const infuraName = networkIdToName[networkId];
+export const fetchEvents = async () => {
+  let newEvents = [];
+  const { data: redemptions } = await subgraphQuery(`
+    {
+    redemptions(first: 1000){
+    id,
+    tokenId
+    redeemerAddress
+    blockNumber
+    blockTimestamp
+    transactionHash
+    amount
+    }
+    }`);
 
-  if (!infuraName) {
-    console.error(`Invalid network id ${networkId}, check events.js`);
-    throw Error("Invalid network id:" + networkId);
-  }
-  // Always use infura for fetching events, provider from wallet can be really slow
-  const provider = new ethers.providers.JsonRpcBatchProvider(
-    `https://${infuraName}.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`
-  );
+  const { data: grantCreated } = await subgraphQuery(`
+    {
+    grantCreateds(first: 1000){
+    id,
+    tokenId
+    blockNumber
+    blockTimestamp
+    transactionHash
+    }
+    }`);
 
-  const vesterContract = new ethers.Contract(
-    process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
-    vesterAbi.abi,
-    provider
-  );
+  const { data: grantCancelled } = await subgraphQuery(`
+    {
+    grantCancelleds(first: 1000){
+    id,
+    tokenId
+    blockNumber
+    blockTimestamp
+    transactionHash
+    }
+    }`);
 
-  let newEvents = {};
-  // TODO: Make below more abstract, just gather all events
-  const redemptionsFilter = vesterContract.filters.Redemption();
-  const redemptionsEvents = await vesterContract.queryFilter(
-    redemptionsFilter,
-    0,
-    "latest"
-  );
-  for (const log of redemptionsEvents) {
-    newEvents[`${log.transactionHash}-${log.logIndex}`] = {
-      type: "Redemption",
-      blockNumber: log.blockNumber,
-      timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
-      transactionHash: log.transactionHash,
-      ...log.args,
-    };
-  }
-
-  const grantCreatedFilter = vesterContract.filters.GrantCreated();
-  const grantCreatedEvents = await vesterContract.queryFilter(
-    grantCreatedFilter,
-    0,
-    "latest"
-  );
-  for (const log of grantCreatedEvents) {
-    newEvents[`${log.transactionHash}-${log.logIndex}`] = {
-      type: "Grant Created",
-      blockNumber: log.blockNumber,
-      timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
-      transactionHash: log.transactionHash,
-      ...log.args,
-    };
-  }
-
-  const grantCancelledFilter = vesterContract.filters.GrantCancelled();
-  const grantCancelledEvents = await vesterContract.queryFilter(
-    grantCancelledFilter,
-    0,
-    "latest"
-  );
-  for (const log of grantCancelledEvents) {
-    newEvents[`${log.transactionHash}-${log.logIndex}`] = {
-      type: "Grant Cancelled",
-      blockNumber: log.blockNumber,
-      timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
-      transactionHash: log.transactionHash,
-      ...log.args,
-    };
-  }
-
-  const supplyFilter = vesterContract.filters.Supply();
-  const supplyEvents = await vesterContract.queryFilter(
-    supplyFilter,
-    0,
-    "latest"
-  );
-  for (const log of supplyEvents) {
-    newEvents[`${log.transactionHash}-${log.logIndex}`] = {
-      type: "Tokens Supplied",
-      blockNumber: log.blockNumber,
-      timestamp: (await provider.getBlock(log.blockNumber)).timestamp,
-      transactionHash: log.transactionHash,
-      ...log.args,
-    };
-  }
-
-  setEvents(newEvents);
-  return Promise.all([
-    redemptionsEvents,
-    grantCreatedEvents,
-    grantCancelledEvents,
-    supplyEvents,
-  ]);
+  newEvents
+    .concat(redemptions.redemptions.map((r) => ({ ...r, type: "Redemption" })))
+    .concat(
+      grantCreated.grantCreateds.map((r) => ({ ...r, type: "Grant Created" }))
+    )
+    .concat(
+      grantCancelled.grantCancelleds.map((r) => ({
+        ...r,
+        type: "Grant Cancelled",
+      }))
+    );
+  return newEvents;
 };
