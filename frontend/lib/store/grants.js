@@ -64,21 +64,11 @@ export const getGrantsByUser = selectorFamily({
     },
 });
 
-const networkIdToName = {
-  1: "mainnet",
-  10: "optimism-mainnet",
-};
 /**** ACTIONS ****/
 
-export const fetchGrant = async (setGrant, tokenId, networkId) => {
-  const infuraName = networkIdToName[networkId];
-  if (!infuraName) {
-    console.error(`Invalid network id ${networkId}, check events.js`);
-    throw Error("Invalid network id:" + networkId);
-  }
-  // Always use infura for fetching events, provider from wallet can be really slow
+export const fetchGrant = async (tokenId) => {
   const provider = new ethers.providers.JsonRpcBatchProvider({
-    url: `https://${infuraName}.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`,
+    url: `https://optimism-mainnet.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`,
     skipFetchSetup: true,
   });
   let vesterInterface = new ethers.utils.Interface(vesterAbi.abi);
@@ -129,41 +119,29 @@ export const fetchGrant = async (setGrant, tokenId, networkId) => {
   );
   const tokenSymbol = await erc20Contract.symbol();
 
-  try {
-    setGrant({
-      tokenId,
-      ...grantData,
-      amountVested: vesterInterface.decodeFunctionResult(
-        "amountVested",
-        resp[1].returnData
-      )[0],
-      amountAvailable: vesterInterface.decodeFunctionResult(
-        "availableForRedemption",
-        resp[2].returnData
-      )[0],
-      owner: vesterInterface.decodeFunctionResult(
-        "ownerOf",
-        resp[3].returnData
-      )[0],
-      tokenSymbol: tokenSymbol,
-    });
-  } catch {
-    console.log("set grant failed");
-  }
-
-  return resp;
+  return {
+    tokenId,
+    ...grantData,
+    amountVested: vesterInterface.decodeFunctionResult(
+      "amountVested",
+      resp[1].returnData
+    )[0],
+    amountAvailable: vesterInterface.decodeFunctionResult(
+      "availableForRedemption",
+      resp[2].returnData
+    )[0],
+    owner: vesterInterface.decodeFunctionResult(
+      "ownerOf",
+      resp[3].returnData
+    )[0],
+    tokenSymbol: tokenSymbol,
+  };
 };
 
-export const fetchGrants = async (setGrant, networkId) => {
-  const infuraName = networkIdToName[networkId];
-
-  if (!infuraName) {
-    console.error(`Invalid network id ${networkId}, check events.js`);
-    throw Error("Invalid network id:" + networkId);
-  }
+export const fetchGrants = async () => {
   // Always use infura for fetching events, provider from wallet can be really slow
   const provider = new ethers.providers.JsonRpcBatchProvider(
-    `https://${infuraName}.infura.io/v3/8c6bfe963db94518b16b17114e29e628`
+    `https://optimism-mainnet.infura.io/v3/8c6bfe963db94518b16b17114e29e628`
   );
   const vesterContract = new ethers.Contract(
     process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
@@ -176,22 +154,15 @@ export const fetchGrants = async (setGrant, networkId) => {
   console.log("fetching grants, totalSuypply", totalSupply.toNumber());
   let promises = [];
   for (let i = 0; i < totalSupply.toNumber(); i++) {
-    promises.push(await fetchGrant(setGrant, i, networkId));
+    promises.push(fetchGrant(i));
   }
 
   return Promise.all(promises);
 };
 
-export const fetchGrantsByUser = async (setGrant, owner, networkId) => {
-  const infuraName = networkIdToName[networkId];
-
-  if (!infuraName) {
-    console.error(`Invalid network id ${networkId}, check events.js`);
-    throw Error("Invalid network id:" + networkId);
-  }
-  // Always use infura for fetching events, provider from wallet can be really slow
+export const fetchGrantsByUser = async (owner) => {
   const provider = new ethers.providers.JsonRpcBatchProvider({
-    url: `https://${infuraName}.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`,
+    url: `https://optimism-mainnet.infura.io/v3/8abb2592d8d344daafc5362ddd33efd1`,
     skipFetchSetup: true,
   });
 
@@ -206,7 +177,7 @@ export const fetchGrantsByUser = async (setGrant, owner, networkId) => {
   const totalSupply = await vesterContract.balanceOf(owner);
   for (let i = 0; i < totalSupply.toNumber(); i++) {
     const grantId = await vesterContract.tokenOfOwnerByIndex(owner, i);
-    promises.push(await fetchGrant(setGrant, grantId, networkId));
+    promises.push(fetchGrant(grantId));
   }
 
   return Promise.all(promises);
