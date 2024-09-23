@@ -1,0 +1,53 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Vester
+    network: optimism
+    source:
+      address: "0x2E9918026db125c692aed46e18697755567f4c1E"
+      abi: Vester
+      startBlock: 5362552
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - ApprovalForAll
+        - GrantCancelled
+        - GrantCreated
+        - OwnerNomination
+        - OwnerUpdate
+        - Redemption
+        - Supply
+        - Transfer
+        - Withdrawal
+      abis:
+        - name: Vester
+          file: ./abis/Vester.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,indexed uint256)
+          handler: handleApproval
+        - event: ApprovalForAll(indexed address,indexed address,bool)
+          handler: handleApprovalForAll
+        - event: GrantCancelled(indexed uint256)
+          handler: handleGrantCancelled
+        - event: GrantCreated(indexed uint256)
+          handler: handleGrantCreated
+        - event: OwnerNomination(indexed address)
+          handler: handleOwnerNomination
+        - event: OwnerUpdate(indexed address,indexed address)
+          handler: handleOwnerUpdate
+        - event: Redemption(indexed uint256,indexed address,uint128)
+          handler: handleRedemption
+        - event: Supply(address,indexed address,uint256)
+          handler: handleSupply
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+        - event: Withdrawal(indexed address,indexed address,uint256)
+          handler: handleWithdrawal
+      file: ./src/vester.ts
