@@ -12,14 +12,14 @@ import { useAccount } from "wagmi";
 export default function UserGrants() {
   const { address, chain } = useAccount();
 
-  const networkId = chain.id || "10";
+  const networkId = chain?.id || "10";
 
   const [grants, setGrant] = useRecoilState(getGrantsByUser(address));
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
     if (address && networkId) {
-      fetchGrantsByUser(setGrant, address, networkId).finally(() => {
+      fetchGrantsByUser(address).finally(() => {
         setLoadingData(false);
       });
     }
