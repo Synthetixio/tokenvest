@@ -37,7 +37,11 @@ export const getGrant = selectorFamily({
   get:
     (tokenId) =>
     ({ get }) => {
-      return get(grantsState)[tokenId];
+      return Object.values(get(grantsState))
+        .flat()
+        .filter((g) => {
+          return g.tokenId.toString() == tokenId.toString();
+        });
     },
   set:
     (tokenId) =>
@@ -53,7 +57,11 @@ export const getGrantsByUser = selectorFamily({
   get:
     (address) =>
     ({ get }) => {
-      return Object.values(get(grantsState)).filter((g) => g.owner == address);
+      return Object.values(get(grantsState))
+        .flat()
+        .filter((g) => {
+          return g.owner == address;
+        });
     },
   set:
     () =>

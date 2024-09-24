@@ -19,7 +19,7 @@ import { useRecoilState } from "recoil";
 import { getGrant, redeemGrant } from "../../../lib/store/grants";
 
 export default function RedeemTokens({ tokenId }) {
-  const [grant, setGrant] = useRecoilState(getGrant(tokenId));
+  const [[grant], setGrant] = useRecoilState(getGrant(tokenId));
 
   const [exchangeMode, setExchangeMode] = useState(false);
   const [exchangeTokenAmount, setExchangeTokenAmount] = useState(0);

@@ -19,9 +19,13 @@ export default function UserGrants() {
 
   useEffect(() => {
     if (address && networkId) {
-      fetchGrantsByUser(address).finally(() => {
-        setLoadingData(false);
-      });
+      fetchGrantsByUser(address)
+        .then((grants) => {
+          setGrant(grants);
+        })
+        .finally(() => {
+          setLoadingData(false);
+        });
     }
   }, [address, networkId, setGrant]);
 
