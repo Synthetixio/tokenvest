@@ -7,7 +7,7 @@ import { parseErrorMessage } from "../../lib/utils/helpers";
 import { createStandaloneToast } from "@chakra-ui/react";
 import theme from "../../styles/theme";
 
-const toast = createStandaloneToast({ theme });
+const { toast } = createStandaloneToast({ theme });
 
 /**** STATE ****/
 
@@ -192,12 +192,13 @@ export const fetchGrantsByUser = async (owner) => {
 };
 
 export const redeemGrant = async (
+  walletClient,
   tokenId,
   exchangeTokenAmount,
   exchangeTokenAddress,
   setGrant
 ) => {
-  const provider = new ethers.providers.Web3Provider(window?.ethereum);
+  const provider = new ethers.providers.Web3Provider(walletClient);
 
   const vesterContract = new ethers.Contract(
     process.env.NEXT_PUBLIC_VESTER_CONTRACT_ADDRESS,
@@ -229,25 +230,22 @@ export const redeemGrant = async (
 
   provider.once("block", () => {
     // Unsure about this wrapping? Originally added to prevent redemptions from old blocks rendering.
-    vesterContract.once(
-      "Redemption",
-      async (redeemedTokenId, address, amount) => {
-        if (tokenId.toNumber() == redeemedTokenId.toNumber()) {
-          toast({
-            title: "Redemption Successful",
-            description: `You have redeemed ${(
-              amount /
-              10 ** 18
-            ).toLocaleString()} tokens.`,
-            status: "success",
-            position: "top",
-            duration: 10000,
-            isClosable: true,
-          });
-        }
-        await fetchGrant(setGrant, tokenId, provider.network.chainId);
+    vesterContract.once("Redemption", async (redeemedTokenId, amount) => {
+      if (tokenId.toNumber() == redeemedTokenId.toNumber()) {
+        toast({
+          title: "Redemption Successful",
+          description: `You have redeemed ${(
+            amount /
+            10 ** 18
+          ).toLocaleString()} tokens.`,
+          status: "success",
+          position: "top",
+          duration: 10000,
+          isClosable: true,
+        });
       }
-    );
+      await fetchGrant(setGrant, tokenId, provider.network.chainId);
+    });
   });
 
   if (exchangeTokenAmount) {

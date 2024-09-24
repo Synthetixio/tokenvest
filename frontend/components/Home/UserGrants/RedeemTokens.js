@@ -17,10 +17,11 @@ import { useState } from "react";
 import { BsCash } from "react-icons/bs";
 import { useRecoilState } from "recoil";
 import { getGrant, redeemGrant } from "../../../lib/store/grants";
+import { useWalletClient } from "wagmi";
 
 export default function RedeemTokens({ tokenId }) {
   const [[grant], setGrant] = useRecoilState(getGrant(tokenId));
-
+  const { data: walletClient } = useWalletClient();
   const [exchangeMode, setExchangeMode] = useState(false);
   const [exchangeTokenAmount, setExchangeTokenAmount] = useState(0);
   const [exchangeTokenAddress, setExchangeTokenAddress] = useState("");
@@ -37,6 +38,7 @@ export default function RedeemTokens({ tokenId }) {
   const redeem = () => {
     setLoadingRedemption(true);
     redeemGrant(
+      walletClient,
       grant.tokenId,
       exchangeMode && exchangeTokenAmount,
       exchangeMode && exchangeTokenAddress,
